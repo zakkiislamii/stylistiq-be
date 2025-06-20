@@ -33,24 +33,25 @@ pipeline {
 
     stage('Deploy to VPS') {
       steps {
-        // Pastikan variabel lingkungan tersedia untuk SSH
-        withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', 
-                                           keyFileVariable: 'SSH_KEY', 
-                                           usernameVariable: 'SSH_USER')]) {
-          // Salin file ke VPS menggunakan SSH key
-          sh """
-          echo "Mulai menyalin file ke VPS..."
-          ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "mkdir -p ~/stylistiq-be"
-          scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" -r . "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/"
-          echo "File berhasil disalin ke VPS"
+        // Ambil file .env.prod dari Credentials
+        withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'), file(credentialsId: 'env-prod', variable: 'ENV_FILE')]) {
+        sh """
+        echo "📁 Membuat direktori di VPS..."
+        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "mkdir -p ~/stylistiq-be"
 
-          echo "Mulai menjalankan docker compose..."
-          ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && \\
-          docker compose --env-file .env.prod up -d --build stylistiq-be"
-          echo "Docker compose berhasil dijalankan"
-          """
+        echo "📤 Menyalin source code (tanpa .env.prod)..."
+        rsync -av --exclude='.env.prod' -e "ssh -o StrictHostKeyChecking=no -i \${SSH_KEY}" ./ "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/"
+
+        echo "📤 Menyalin .env.prod dari Credentials ke VPS..."
+        scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${ENV_FILE}" "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/.env.prod"
+
+        echo "🚀 Menjalankan docker compose di VPS..."
+        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build stylistiq-be"
+
+        echo "✅ Deployment berhasil dijalankan"
+        """
         }
-      }
+    }
     }
     
     stage('Verify Deployment') {
