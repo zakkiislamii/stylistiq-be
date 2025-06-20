@@ -46,7 +46,7 @@ pipeline {
         scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${ENV_FILE}" "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/.env.prod"
 
         echo "🚀 Menjalankan docker compose di VPS..."
-        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build stylistiq-be"
+        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build app"
 
         echo "✅ Deployment berhasil dijalankan"
         """
