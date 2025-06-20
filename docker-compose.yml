@@ -3,7 +3,7 @@ services:
     build: .
     container_name: stylistiq_be
     ports:
-      - '3010:3000'
+      - '3011:3000'
     environment:
       NODE_ENV: prod
       DB_TYPE: ${DB_TYPE}
