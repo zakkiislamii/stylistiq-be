@@ -13,9 +13,8 @@ export const databaseProviders = [
         password: Env.DB_PASSWORD,
         database: Env.DB_NAME,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        synchronize: true,
+        synchronize: Env.NODE_ENV === 'dev' ? true : false,
       });
-
       return dataSource.initialize();
     },
   },
