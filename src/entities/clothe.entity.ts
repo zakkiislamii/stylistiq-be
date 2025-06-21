@@ -4,14 +4,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { User } from './user.entity';
-import { ClothesCollection } from './clothe_collection.entity';
 import { Schedule } from './schedule.entity';
 import { ClothesCategory } from 'src/common/enums/clothes_category.enum';
+import { Collection } from './collection.entity';
 
 @Entity('clothes')
 export class Clothes {
@@ -47,9 +48,31 @@ export class Clothes {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.clothe)
+  @ManyToMany(() => Schedule, (schedule) => schedule.clothes)
+  @JoinTable({
+    name: 'clothes_schedules',
+    joinColumn: {
+      name: 'clothe_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'schedule_id',
+      referencedColumnName: 'id',
+    },
+  })
   schedules: Schedule[];
 
-  @OneToMany(() => ClothesCollection, (cc) => cc.clothe)
-  clothesCollections: ClothesCollection[];
+  @ManyToMany(() => Collection, (collection) => collection.clothes)
+  @JoinTable({
+    name: 'clothes_collections',
+    joinColumn: {
+      name: 'clothe_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'collection_id',
+      referencedColumnName: 'id',
+    },
+  })
+  collections: Collection[];
 }
