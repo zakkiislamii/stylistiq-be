@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { UpdateUserDto } from 'src/common/dtos/user/updateUser.dto';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -11,5 +12,22 @@ export class UserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findUserById(userId: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id: userId } });
+  }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    const updatedUser = {
+      ...existingUser,
+      ...dto,
+    };
+
+    return this.userRepository.save(updatedUser);
   }
 }
