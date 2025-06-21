@@ -5,8 +5,9 @@ import {
   UpdateDateColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Timestamp,
+  ManyToMany,
   JoinColumn,
+  Timestamp,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Clothes } from './clothe.entity';
@@ -35,6 +36,6 @@ export class Schedule {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Clothes, (clothe) => clothe.schedules)
-  clothe: Clothes;
+  @ManyToMany(() => Clothes, (clothe) => clothe.schedules)
+  clothes: Clothes[];
 }

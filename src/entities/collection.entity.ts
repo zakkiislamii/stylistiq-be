@@ -3,13 +3,13 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   Timestamp,
   JoinColumn,
+  ManyToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { ClothesCollection } from './clothe_collection.entity';
+import { Clothes } from './clothe.entity';
 
 @Entity('collections')
 export class Collection {
@@ -28,10 +28,10 @@ export class Collection {
   @CreateDateColumn({ name: 'updated_at' })
   updatedAt: Timestamp;
 
-  @OneToMany(() => ClothesCollection, (cc) => cc.collection)
-  clothesCollections: ClothesCollection[];
-
   @ManyToOne(() => User, (user) => user.collections)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToMany(() => Clothes, (clothes) => clothes.collections)
+  clothes: Clothes[];
 }
