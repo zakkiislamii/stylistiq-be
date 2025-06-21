@@ -4,19 +4,11 @@ import { AuthProviders } from '../providers/auth.providers';
 import { AuthRepository } from '../../repositories/auth.repository';
 import { AuthService } from 'src/services/auth.service';
 import { UserModule } from './user.module';
-import { JwtModule } from '@nestjs/jwt';
-import { JWT_SECRET } from '../config/env.config';
 import { JwtTokenService } from 'src/services/jwt.service';
+import { JwtTokenModule } from './jwt-token.module';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    UserModule,
-    JwtModule.register({
-      secret: JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
-    }),
-  ],
+  imports: [DatabaseModule, UserModule, JwtTokenModule],
   providers: [...AuthProviders, AuthRepository, AuthService, JwtTokenService],
   exports: [AuthService],
 })

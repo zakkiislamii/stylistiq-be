@@ -6,10 +6,12 @@ import { UserController } from './controllers/user.controller';
 import { UserModule } from './common/modules/user.module';
 import { AuthModule } from './common/modules/auth.module';
 import { AuthController } from './controllers/auth.controller';
+import { JwtAuthGuard } from './common/guards/JwtAuthGuard.guard';
+import { JwtTokenModule } from './common/modules/jwt-token.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, AuthModule],
+  imports: [DatabaseModule, UserModule, AuthModule, JwtTokenModule],
   controllers: [AppController, UserController, AuthController],
-  providers: [AppService],
+  providers: [AppService, JwtAuthGuard],
 })
 export class AppModule {}
