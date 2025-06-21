@@ -1,4 +1,4 @@
-import { Env } from 'src/config/env.config';
+import { Env } from 'src/common/config/env.config';
 import { DataSource } from 'typeorm';
 
 export const databaseProviders = [

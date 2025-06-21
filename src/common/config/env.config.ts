@@ -14,3 +14,5 @@ export const Env = {
   DB_NAME: process.env.DB_NAME,
   NODE_ENV: process.env.NODE_ENV,
 };
+
+export const JWT_SECRET = process.env.JWT_SECRET;

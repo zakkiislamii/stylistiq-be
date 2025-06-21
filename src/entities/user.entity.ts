@@ -41,7 +41,7 @@ export class User {
   @Column({ type: 'date', nullable: true })
   birthday?: Date;
 
-  @Column({ type: 'enum', enum: Gender })
+  @Column({ type: 'enum', enum: Gender, nullable: true })
   gender?: Gender;
 
   @Column({ nullable: true, name: 'profile_photo' })

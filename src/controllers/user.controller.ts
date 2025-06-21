@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { UserService } from 'src/services/user.service';
-import { ResponseHelper } from 'src/helpers/response.helper';
+import { ResponseHelper } from 'src/common/helpers/response.helper';
 import { User } from 'src/entities/user.entity';
 import { ApiSuccessResponse } from 'src/common/interfaces/response.interface';
 
