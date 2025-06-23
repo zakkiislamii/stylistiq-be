@@ -12,8 +12,8 @@ import {
 import { Clothes } from './clothe.entity';
 import { Schedule } from './schedule.entity';
 import { Collection } from './collection.entity';
-import { Gender } from 'src/common/enums/gender.enum';
-import { UserBodyProfile } from './user_body_profile.entity';
+import { Gender } from 'src/contracts/enums/gender.enum';
+import { UserBodyProfile } from './userBodyProfile.entity';
 
 @Entity('users')
 export class User {
@@ -41,7 +41,7 @@ export class User {
   @Column({ type: 'date', nullable: true })
   birthday?: Date;
 
-  @Column({ type: 'enum', enum: Gender })
+  @Column({ type: 'enum', enum: Gender, nullable: true })
   gender?: Gender;
 
   @Column({ nullable: true, name: 'profile_photo' })
