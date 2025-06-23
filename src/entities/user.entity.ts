@@ -12,8 +12,8 @@ import {
 import { Clothes } from './clothe.entity';
 import { Schedule } from './schedule.entity';
 import { Collection } from './collection.entity';
-import { Gender } from 'src/common/enums/gender.enum';
-import { UserBodyProfile } from './user_body_profile.entity';
+import { Gender } from 'src/contracts/enums/gender.enum';
+import { UserBodyProfile } from './userBodyProfile.entity';
 
 @Entity('users')
 export class User {

@@ -1,10 +1,10 @@
 import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
-import { LoginDto } from 'src/common/dtos/auth/login.dto';
-import { RegisterDto } from 'src/common/dtos/auth/register.dto';
-import { ApiSuccessResponse } from 'src/common/interfaces/response.interface';
+import { ApiSuccessResponse } from 'src/contracts/interfaces/response.interface';
 import { User } from 'src/entities/user.entity';
 import { ResponseHelper } from 'src/common/helpers/response.helper';
-import { AuthService } from 'src/services/auth.service';
+import { AuthService } from 'src/modules/auth/auth.service';
+import { RegisterDto } from 'src/modules/auth/dto/register.dto';
+import { LoginDto } from 'src/modules/auth/dto/login.dto';
 
 @Controller('auth')
 export class AuthController {

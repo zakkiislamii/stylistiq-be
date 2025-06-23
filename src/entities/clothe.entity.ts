@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Schedule } from './schedule.entity';
-import { ClothesCategory } from 'src/common/enums/clothes_category.enum';
+import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 import { Collection } from './collection.entity';
 
 @Entity('clothes')
