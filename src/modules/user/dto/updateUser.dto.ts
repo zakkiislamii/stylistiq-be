@@ -6,7 +6,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Gender } from 'src/common/enums/gender.enum';
+import { Gender } from 'src/contracts/enums/gender.enum';
 
 export class UpdateUserDto {
   @IsOptional()

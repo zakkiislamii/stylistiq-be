@@ -9,28 +9,28 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ResponseHelper } from 'src/common/helpers/response.helper';
-import { JwtAuthGuard } from 'src/common/guards/JwtAuthGuard.guard';
-import { UserService } from 'src/services/user.service';
-import { UpdateUserDto } from 'src/common/dtos/user/updateUser.dto';
+import { JwtAuth } from 'src/common/guards/jwtAuth.guard';
+import { UserService } from './user.service';
+import { UpdateUserDto } from 'src/modules/user/dto/updateUser.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuth)
   @Get('profile')
   async getProfile(@Req() req: Request) {
     const user = req['user'];
-    const userId = user.user.id;
+    const userId = user.userId;
     console.log('userId', userId);
     const data = await this.userService.findUserById(userId);
     return ResponseHelper.success(data, 'Login successful', HttpStatus.OK);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuth)
   @Post('')
   async updateProfile(@Req() req: Request, @Body() dto: UpdateUserDto) {
     const user = req['user'];
-    const userId = user.user.id;
+    const userId = user.userId;
     const data = await this.userService.updateUser(userId, dto);
     return ResponseHelper.success(
       data,

@@ -8,7 +8,7 @@ import {
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
-} from 'src/common/interfaces/response.interface';
+} from 'src/contracts/interfaces/response.interface';
 import { Response } from 'express';
 
 export class ResponseHelper {
