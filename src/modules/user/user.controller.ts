@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ResponseHelper } from 'src/common/helpers/response.helper';
-import { JwtAuth } from 'src/common/guards/jwtAuth.guard';
+import { JwtAuth } from 'src/common/guards/jwt.guard';
 import { UserService } from './user.service';
 import { UpdateUserDto } from 'src/modules/user/dto/updateUser.dto';
 
@@ -21,7 +21,6 @@ export class UserController {
   async getProfile(@Req() req: Request) {
     const user = req['user'];
     const userId = user.userId;
-    console.log('userId', userId);
     const data = await this.userService.findUserById(userId);
     return ResponseHelper.success(data, 'Login successful', HttpStatus.OK);
   }
