@@ -49,23 +49,31 @@ pipeline {
     stage('Deploy to VPS') {
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'), file(credentialsId: 'env-prod', variable: 'ENV_FILE')]) {
-        sh """
-        echo "📁 Membuat direktori di VPS..."
-        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "mkdir -p ~/stylistiq-be"
+          sh """
+            echo "📁 Mengecek dan membersihkan direktori stylistiq-be di VPS..."
+            ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" '
+              if [ -d ~/stylistiq-be ]; then
+                echo "📦 Direktori stylistiq-be ditemukan. Menghapus..."
+                rm -rf ~/stylistiq-be
+              else
+                echo "📂 Direktori stylistiq-be tidak ditemukan. Akan dibuat baru."
+              fi
+              mkdir -p ~/stylistiq-be
+            '
 
-        echo "📤 Menyalin source code (tanpa .env.prod)..."
-        rsync -av --exclude='.env.prod' -e "ssh -o StrictHostKeyChecking=no -i \${SSH_KEY}" ./ "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/"
+            echo "📤 Menyalin source code (tanpa .env.prod)..."
+            rsync -av --exclude='.env.prod' -e "ssh -o StrictHostKeyChecking=no -i \${SSH_KEY}" ./ "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/"
 
-        echo "📤 Menyalin .env.prod dari Credentials ke VPS..."
-        scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${ENV_FILE}" "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/.env.prod"
+            echo "📤 Menyalin .env.prod dari Credentials ke VPS..."
+            scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${ENV_FILE}" "\${SSH_USER}@\${VPS_HOST}:~/stylistiq-be/.env.prod"
 
-        echo "🚀 Menjalankan docker compose di VPS..."
-        ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build app"
+            echo "🚀 Menjalankan docker compose di VPS..."
+            ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build app"
 
-        echo "✅ Deployment berhasil dijalankan"
-        """
+            echo "✅ Deployment berhasil dijalankan"
+          """
         }
-    }
+      }
     }
     
     stage('Verify Deployment') {
