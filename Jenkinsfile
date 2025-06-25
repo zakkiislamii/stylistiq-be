@@ -2,8 +2,8 @@ pipeline {
   agent any
   
   environment {
-    COMPOSE_PROJECT_NAME = 'stylistiq-be' //name project
-    VPS_HOST = 'stylistiq.myzaki.store' // Domain
+    COMPOSE_PROJECT_NAME = 'stylistiq-be' 
+    VPS_HOST = 'stylistiq.myzaki.store'
   }
   stages {
     stage('Clone Repository') {
