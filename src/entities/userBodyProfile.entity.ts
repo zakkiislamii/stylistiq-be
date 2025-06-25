@@ -42,6 +42,12 @@ export class UserBodyProfile {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Timestamp;
 
+  @Column({ type: 'float', nullable: true })
+  height?: number;
+
+  @Column({ type: 'float', nullable: true })
+  weight?: number;
+
   @OneToOne(() => User, (user) => user.bodyProfile)
   @JoinColumn({ name: 'user_id' })
   user: User;
