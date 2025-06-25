@@ -5,7 +5,6 @@ pipeline {
     COMPOSE_PROJECT_NAME = 'stylistiq-be' 
     VPS_HOST = 'stylistiq.myzaki.store'
   }
-  
   stages {
     stage('Clone Repository') {
       steps {
@@ -14,6 +13,24 @@ pipeline {
       }
     }
 
+    stage('Show Commit Info') {
+      steps {
+        sh '''
+          echo "✅ Commit yang sedang dideploy:"
+          git log -1 --pretty=format:"%h - %an: %s"
+        '''
+      }
+    }
+
+    stage('Show Recent Commits') {
+      steps {
+        sh '''
+          echo "📜 5 Commit terakhir yang dideploy:"
+          git log -5 --pretty=format:"%h - %an: %s"
+        '''
+      }
+    }
+    
     stage('Prepare SSH Key') {
       steps {
         sh 'mkdir -p ~/.ssh'
@@ -59,7 +76,6 @@ pipeline {
             ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "docker ps"
           """
         }
-        
         script {
           try {
             sh """

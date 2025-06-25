@@ -32,12 +32,6 @@ export class User {
   @Column({ nullable: true })
   age?: string;
 
-  @Column({ type: 'float', nullable: true })
-  height?: number;
-
-  @Column({ type: 'float', nullable: true })
-  weight?: number;
-
   @Column({ type: 'date', nullable: true })
   birthday?: Date;
 
