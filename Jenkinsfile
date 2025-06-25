@@ -9,12 +9,13 @@ pipeline {
           string(credentialsId: 'vps-host', variable: 'VPS_HOST')
         ]) {
           script {
-            env.COMPOSE_PROJECT_NAME = "${COMPOSE_PROJECT_NAME}"
-            env.VPS_HOST = "${env.VPS_HOST}"
+            env.COMPOSE_PROJECT_NAME = COMPOSE_PROJECT_NAME
+            env.VPS_HOST = VPS_HOST
           }
         }
       }
     }
+
     stage('Clone Repository') {
       steps {
         checkout scm
@@ -39,25 +40,28 @@ pipeline {
         '''
       }
     }
-    
+
     stage('Prepare SSH Key') {
       steps {
         sh 'mkdir -p ~/.ssh'
-        sh '''
+        sh """
           echo "Host ${env.VPS_HOST}
             StrictHostKeyChecking no
             UserKnownHostsFile=/dev/null
           " > ~/.ssh/config
-          
+
           chmod 600 ~/.ssh/config
-        '''
+        """
         echo "SSH Key preparation selesai"
       }
     }
 
     stage('Deploy to VPS') {
       steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'), file(credentialsId: 'env-prod', variable: 'ENV_FILE')]) {
+        withCredentials([
+          sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
+          file(credentialsId: 'env-prod', variable: 'ENV_FILE')
+        ]) {
           sh """
             echo "📁 Mengecek dan membersihkan direktori stylistiq-be di VPS..."
             ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${env.VPS_HOST}" '
@@ -84,10 +88,12 @@ pipeline {
         }
       }
     }
-    
+
     stage('Verify Deployment') {
       steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+        withCredentials([
+          sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+        ]) {
           sh """
             echo "Memeriksa container yang berjalan..."
             ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${env.VPS_HOST}" "docker ps"
@@ -107,7 +113,7 @@ pipeline {
       }
     }
   }
-  
+
   post {
     success {
       echo "✅ Deployment successful! Application running at https://${env.VPS_HOST}"
