@@ -15,7 +15,10 @@ export class UserRepository {
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id: userId } });
+    return this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['bodyProfile'],
+    });
   }
 
   async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
