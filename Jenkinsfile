@@ -5,7 +5,6 @@ pipeline {
     COMPOSE_PROJECT_NAME = 'stylistiq-be' //name project
     VPS_HOST = 'stylistiq.myzaki.store' // Domain
   }
-  
   stages {
     stage('Clone Repository') {
       steps {
@@ -14,11 +13,18 @@ pipeline {
       }
     }
 
+    stage('Show Commit Info') {
+      steps {
+        sh '''
+          echo "✅ Commit yang sedang dideploy:"
+          git log -1 --pretty=format:"%h - %an: %s"
+        '''
+      }
+    }
+
     stage('Prepare SSH Key') {
       steps {
         sh 'mkdir -p ~/.ssh'
-        
-        // Konfigurasi SSH untuk tidak meminta konfirmasi host
         sh '''
           echo "Host $VPS_HOST
             StrictHostKeyChecking no
@@ -33,7 +39,6 @@ pipeline {
 
     stage('Deploy to VPS') {
       steps {
-        // Ambil file .env.prod dari Credentials
         withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'), file(credentialsId: 'env-prod', variable: 'ENV_FILE')]) {
         sh """
         echo "📁 Membuat direktori di VPS..."
@@ -56,14 +61,12 @@ pipeline {
     
     stage('Verify Deployment') {
       steps {
-        // Verifikasi status container
         withCredentials([sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
           sh """
             echo "Memeriksa container yang berjalan..."
             ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${VPS_HOST}" "docker ps"
           """
         }
-        
         script {
           try {
             sh """
