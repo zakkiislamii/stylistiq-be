@@ -62,9 +62,9 @@ pipeline {
           sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
           file(credentialsId: 'env-prod', variable: 'ENV_FILE')
         ]) {
-          sh """
+          sh '''#!/bin/bash
             echo "📁 Mengecek dan membersihkan direktori stylistiq-be di VPS..."
-            ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${env.VPS_HOST}" '
+            ssh -o StrictHostKeyChecking=no -i "${SSH_KEY}" "${SSH_USER}@${VPS_HOST}" '
               if [ -d ~/stylistiq-be ]; then
                 echo "📦 Direktori stylistiq-be ditemukan. Menghapus..."
                 rm -rf ~/stylistiq-be
@@ -75,16 +75,16 @@ pipeline {
             '
 
             echo "📤 Menyalin source code (tanpa .env.prod)..."
-            rsync -av --exclude='.env.prod' -e "ssh -o StrictHostKeyChecking=no -i \${SSH_KEY}" ./ "\${SSH_USER}@\${env.VPS_HOST}:~/stylistiq-be/"
+            rsync -av --exclude='.env.prod' -e "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY}" ./ "${SSH_USER}@${VPS_HOST}:~/stylistiq-be/"
 
             echo "📤 Menyalin .env.prod dari Credentials ke VPS..."
-            scp -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${ENV_FILE}" "\${SSH_USER}@\${env.VPS_HOST}:~/stylistiq-be/.env.prod"
+            scp -o StrictHostKeyChecking=no -i "${SSH_KEY}" "${ENV_FILE}" "${SSH_USER}@${VPS_HOST}:~/stylistiq-be/.env.prod"
 
             echo "🚀 Menjalankan docker compose di VPS..."
-            ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${env.VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build app"
+            ssh -o StrictHostKeyChecking=no -i "${SSH_KEY}" "${SSH_USER}@${VPS_HOST}" "cd ~/stylistiq-be && docker compose --env-file .env.prod up -d --build app"
 
             echo "✅ Deployment berhasil dijalankan"
-          """
+          '''
         }
       }
     }
@@ -94,17 +94,17 @@ pipeline {
         withCredentials([
           sshUserPrivateKey(credentialsId: 'vps-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
         ]) {
-          sh """
+          sh '''#!/bin/bash
             echo "Memeriksa container yang berjalan..."
-            ssh -o StrictHostKeyChecking=no -i "\${SSH_KEY}" "\${SSH_USER}@\${env.VPS_HOST}" "docker ps"
-          """
+            ssh -o StrictHostKeyChecking=no -i "${SSH_KEY}" "${SSH_USER}@${VPS_HOST}" "docker ps"
+          '''
         }
         script {
           try {
-            sh """
+            sh '''#!/bin/bash
               echo "Memeriksa respons aplikasi..."
-              curl -k -I https://\${env.VPS_HOST} || echo "Service might still be starting up"
-            """
+              curl -k -I https://${VPS_HOST} || echo "Service might still be starting up"
+            '''
             echo "Deployment verification complete"
           } catch (Exception e) {
             echo "Warning: Could not verify service: ${e.message}"
