@@ -22,6 +22,15 @@ pipeline {
       }
     }
 
+    stage('Show Recent Commits') {
+      steps {
+        sh '''
+          echo "📜 5 Commit terakhir yang dideploy:"
+          git log -5 --pretty=format:"%h - %an: %s"
+        '''
+      }
+    }
+    
     stage('Prepare SSH Key') {
       steps {
         sh 'mkdir -p ~/.ssh'
