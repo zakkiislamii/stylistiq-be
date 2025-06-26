@@ -78,8 +78,6 @@ export class FileUploadController {
         contentType = 'image/png';
         break;
       case '.jpg':
-        contentType = 'image/jeg';
-        break;
       case '.jpeg':
         contentType = 'image/jpeg';
         break;
