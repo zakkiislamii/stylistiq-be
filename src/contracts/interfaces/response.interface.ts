@@ -7,5 +7,5 @@ export interface ApiSuccessResponse<T = any> {
 export interface ApiErrorResponse {
   statusCode: number;
   message: string;
-  error: string;
+  error: string | string[];
 }

@@ -22,7 +22,11 @@ export class UserController {
     const user = req['user'];
     const userId = user.userId;
     const data = await this.userService.findUserById(userId);
-    return ResponseHelper.success(data, 'Login successful', HttpStatus.OK);
+    return ResponseHelper.success(
+      data,
+      'Successfully retrieved user profile',
+      HttpStatus.OK,
+    );
   }
 
   @UseGuards(JwtAuth)
@@ -33,7 +37,7 @@ export class UserController {
     const data = await this.userService.updateUser(userId, dto);
     return ResponseHelper.success(
       data,
-      'Update profile successful',
+      'User profile updated successfully',
       HttpStatus.OK,
     );
   }
