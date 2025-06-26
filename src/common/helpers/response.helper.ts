@@ -10,6 +10,7 @@ import {
   ApiSuccessResponse,
 } from 'src/contracts/interfaces/response.interface';
 import { Response } from 'express';
+import { MulterError } from 'multer';
 
 export class ResponseHelper {
   static success<T>(
@@ -59,6 +60,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error = exceptionName
         .replace(/Exception$/, '')
         .replace(/([a-z])([A-Z])/g, '$1 $2');
+    } else if (exception instanceof MulterError) {
+      status = HttpStatus.BAD_REQUEST;
+      message =
+        exception.code === 'LIMIT_FILE_SIZE'
+          ? 'File size should not exceed 5MB'
+          : exception.message;
+      error = 'File Upload Error';
     } else if (exception instanceof Error) {
       error = exception.message;
     }
