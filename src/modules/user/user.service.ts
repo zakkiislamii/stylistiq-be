@@ -36,7 +36,7 @@ export class UserService {
     const updateData = {
       ...dto,
       ...(birthDate ? { birthday: birthDate } : {}),
-      age,
+      age: String(age),
     };
 
     const user = await this.userRepository.updateUser(userId, updateData);
@@ -44,5 +44,16 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async updatePhotoProfileUser(
+    userId: string,
+    image: string,
+  ): Promise<{ imageUrl: string }> {
+    return this.userRepository.updatePhotoProfileUser(userId, image);
+  }
+
+  async getCurrentUser(userId: string) {
+    return this.userRepository.getCurrentUser(userId);
   }
 }
