@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { UpdateUserDto } from 'src/modules/user/dto/updateUser.dto';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
+import * as path from 'path';
 
 @Injectable()
 export class UserRepository {
@@ -32,5 +33,32 @@ export class UserRepository {
     };
 
     return this.userRepository.save(updatedUser);
+  }
+
+  async updatePhotoProfileUser(
+    userId: string,
+    imagePath: string,
+  ): Promise<{ imageUrl: string }> {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!existingUser) {
+      throw new Error('User not found');
+    }
+
+    existingUser.profilePhoto = imagePath;
+    await this.userRepository.save(existingUser);
+
+    return {
+      imageUrl: `/file/profile/${userId}/${path.basename(imagePath)}`,
+    };
+  }
+
+  async getCurrentUser(userId: string) {
+    return this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'profilePhoto'],
+    });
   }
 }
