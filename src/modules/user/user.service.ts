@@ -49,7 +49,7 @@ export class UserService {
   async updatePhotoProfileUser(
     userId: string,
     image: string,
-  ): Promise<{ imageUrl: string }> {
+  ): Promise<{ imagePath: string; userId: string }> {
     return this.userRepository.updatePhotoProfileUser(userId, image);
   }
 
