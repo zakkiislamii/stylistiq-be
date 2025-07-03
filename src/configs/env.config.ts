@@ -17,3 +17,4 @@ export const Env = {
 
 export const JWT_SECRET = process.env.JWT_SECRET;
 export const BASE_URL = process.env.BASE_URL;
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_WEB_CLIENT_ID;
