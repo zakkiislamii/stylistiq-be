@@ -30,17 +30,17 @@ export class Clothes {
   })
   category: ClothesCategory;
 
-  @Column({ name: 'item_type', nullable: true })
-  itemType?: string;
+  @Column({ name: 'item_type', type: 'varchar', nullable: true })
+  itemType?: string | null;
 
-  @Column({ name: 'color', nullable: true })
-  color?: string;
+  @Column({ name: 'color', type: 'varchar', nullable: true })
+  color?: string | null;
 
-  @Column({ name: 'image', nullable: true })
-  image?: string;
+  @Column({ name: 'image', type: 'varchar', nullable: true })
+  image?: string | null;
 
-  @Column({ name: 'note', nullable: true })
-  note?: string;
+  @Column({ name: 'note', type: 'varchar', nullable: true })
+  note?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -60,7 +60,7 @@ export class Clothes {
       referencedColumnName: 'id',
     },
   })
-  schedules: Schedule[];
+  schedules?: Schedule[] | null;
 
   @ManyToMany(() => Collection, (collection) => collection.clothes)
   @JoinTable({
@@ -74,5 +74,5 @@ export class Clothes {
       referencedColumnName: 'id',
     },
   })
-  collections: Collection[];
+  collections?: Collection[] | null;
 }

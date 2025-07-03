@@ -55,11 +55,4 @@ export class UserRepository {
       userId: existingUser.id,
     };
   }
-
-  async getCurrentUser(userId: string) {
-    return this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'profilePhoto'],
-    });
-  }
 }
