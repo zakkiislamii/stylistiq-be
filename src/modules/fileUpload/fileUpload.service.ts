@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -16,11 +16,11 @@ export class FileUploadService {
       userId,
       relativePath,
     );
-    const data = `${BASE_URL}/profile/${imageUrl.userId}/${imageUrl.imagePath}`;
+    const data = `${BASE_URL}/file/profile/${imageUrl.userId}/${imageUrl.imagePath}`;
     return data;
   }
 
-  deleteOldProfilePhoto(userId: string, keepFilename?: string) {
+  async deleteOldProfilePhoto(userId: string, keepFilename?: string) {
     const userProfileDir = path.join(
       process.cwd(),
       'uploads',
@@ -31,14 +31,20 @@ export class FileUploadService {
     );
 
     if (fs.existsSync(userProfileDir)) {
-      const files = fs.readdirSync(userProfileDir);
-      files.forEach((file) => {
-        if (file === keepFilename) return;
+      const files = await fs.promises.readdir(userProfileDir);
+      for (const file of files) {
+        if (file === keepFilename) continue;
+
         const filePath = path.join(userProfileDir, file);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        try {
+          await fs.promises.unlink(filePath);
+        } catch (err) {
+          throw new InternalServerErrorException(
+            `Gagal menghapus file: ${filePath}`,
+            err,
+          );
         }
-      });
+      }
     }
   }
 }
