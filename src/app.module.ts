@@ -10,6 +10,8 @@ import { UserBodyProfileModule } from './modules/userBodyProfile/userBodyProfile
 import { UserBodyProfileController } from './modules/userBodyProfile/userBodyProfile.controller';
 import { FileUploadController } from './modules/fileUpload/fileUpload.controller';
 import { FileUploadModule } from './modules/fileUpload/fileUpload.module';
+import { ClothesController } from './modules/clothes/clothes.controller';
+import { ClothesModule } from './modules/clothes/clothes.module';
 
 @Module({
   imports: [
@@ -19,12 +21,14 @@ import { FileUploadModule } from './modules/fileUpload/fileUpload.module';
     JwtTokenModule,
     UserBodyProfileModule,
     FileUploadModule,
+    ClothesModule,
   ],
   controllers: [
     UserController,
     AuthController,
     UserBodyProfileController,
     FileUploadController,
+    ClothesController,
   ],
   providers: [JwtAuth],
 })

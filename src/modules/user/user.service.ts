@@ -52,8 +52,4 @@ export class UserService {
   ): Promise<{ imagePath: string; userId: string }> {
     return this.userRepository.updatePhotoProfileUser(userId, image);
   }
-
-  async getCurrentUser(userId: string) {
-    return this.userRepository.getCurrentUser(userId);
-  }
 }
