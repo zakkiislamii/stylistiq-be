@@ -40,7 +40,7 @@ export class FileUploadController {
     }
 
     const userId = req['user'].userId;
-    this.fileUploadService.deleteOldProfilePhoto(userId, file.filename);
+    await this.fileUploadService.deleteOldProfilePhoto(userId, file.filename);
 
     const data = await this.fileUploadService.savePhotoToDb(
       userId,

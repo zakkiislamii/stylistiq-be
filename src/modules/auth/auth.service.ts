@@ -7,18 +7,20 @@ import {
 import { User } from 'src/entities/user.entity';
 import { AuthRepository } from 'src/modules/auth/auth.repository';
 import * as bcrypt from 'bcrypt';
-import { JwtTokenService } from '../jwt/jwt.service';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
 import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { LoginFirebaseDto } from './dto/loginFirebase.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
-    private readonly jwtTokenService: JwtTokenService,
+    private readonly jwtTokenService: JwtService,
   ) {}
+
   async register(registerDto: RegisterDto): Promise<User> {
     const existingUser = await this.userService.findByEmail(registerDto.email);
     if (existingUser) {
@@ -28,6 +30,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(registerDto.password, saltOrRounds);
     return this.authRepository.register(registerDto.email, passwordHash);
   }
+
   async login(loginDto: LoginDto): Promise<{ token: string }> {
     const user = await this.authRepository.login(loginDto.email);
 
@@ -47,6 +50,20 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    const payload = { userId: user.id, email: user.email };
+    const token = this.jwtTokenService.sign(payload);
+
+    return { token };
+  }
+
+  async loginFirebase(
+    loginFirebaseDto: LoginFirebaseDto,
+  ): Promise<{ token: string }> {
+    const user = await this.authRepository.loginFirebase(
+      loginFirebaseDto.email,
+      loginFirebaseDto.name,
+    );
 
     const payload = { userId: user.id, email: user.email };
     const token = this.jwtTokenService.sign(payload);

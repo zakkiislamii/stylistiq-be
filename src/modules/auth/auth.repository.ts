@@ -20,4 +20,16 @@ export class AuthRepository {
   async login(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
   }
+
+  async loginFirebase(email: string, name: string): Promise<User> {
+    let user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      user = await this.userRepository.save(
+        this.userRepository.create({ email, name }),
+      );
+    }
+
+    return user;
+  }
 }
