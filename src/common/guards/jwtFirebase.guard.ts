@@ -36,7 +36,6 @@ export class JwtFirebaseAuth implements CanActivate {
       });
       const payload = ticket.getPayload();
       request['user'] = payload;
-      console.log(payload);
       return true;
     } catch (firebaseError) {
       throw new UnauthorizedException(
