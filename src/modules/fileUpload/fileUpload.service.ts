@@ -1,23 +1,26 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as path from 'path';
 import * as fs from 'fs';
-import { folder } from 'src/common/constants/variabel.constants';
 import { BASE_URL } from 'src/configs/env.config';
+import { CollectionService } from '../collections/collection.service';
 
 @Injectable()
 export class FileUploadService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly collectionService: CollectionService,
+  ) {}
 
   async savePhotoToDb(userId: string, filename: string) {
-    const paths = folder(userId).profile;
-    const relativePath = `${paths}/${userId}/${filename}`;
-    const imageUrl = await this.userService.updatePhotoProfileUser(
-      userId,
-      relativePath,
-    );
-    const data = `${BASE_URL}/file/profile/${imageUrl.userId}/${imageUrl.imagePath}`;
-    return data;
+    // const paths = folder(userId).profile;
+    const relativePath = `${BASE_URL}/file/${userId}/profile/${filename}`;
+    await this.userService.updatePhotoProfileUser(userId, relativePath);
+    return relativePath;
   }
 
   async deleteOldProfilePhoto(userId: string, keepFilename?: string) {
@@ -26,8 +29,8 @@ export class FileUploadService {
       'uploads',
       'private',
       'user',
-      'profile',
       userId,
+      'profile',
     );
 
     if (fs.existsSync(userProfileDir)) {
@@ -45,6 +48,47 @@ export class FileUploadService {
           );
         }
       }
+    }
+  }
+
+  async deleteOldCollectionImage(params: {
+    userId: string;
+    collectionId?: string;
+    deleteFilename?: string;
+  }) {
+    let filename = '';
+    if (params.collectionId) {
+      const existingCollection = await this.collectionService.findById(
+        params.collectionId,
+        params.userId,
+      );
+
+      if (!existingCollection?.image) {
+        throw new NotFoundException('File tidak ditemukan');
+      }
+
+      filename = path.basename(existingCollection.image);
+    } else if (params.deleteFilename) {
+      filename = params.deleteFilename;
+    }
+
+    const collectionImagePath = path.join(
+      process.cwd(),
+      'uploads',
+      'private',
+      'user',
+      params.userId,
+      'collection',
+      filename,
+    );
+
+    try {
+      await fs.promises.unlink(collectionImagePath);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `Gagal menghapus file: ${collectionImagePath}`,
+        err,
+      );
     }
   }
 }

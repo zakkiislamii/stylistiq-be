@@ -33,7 +33,6 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.0.3",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/elasticsearch": "^11.1.0",
