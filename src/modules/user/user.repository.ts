@@ -16,10 +16,14 @@ export class UserRepository {
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['bodyProfile'],
-    });
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.bodyProfile', 'bodyProfile')
+      .loadRelationCountAndMap('user.clothesCount', 'user.clothes')
+      .loadRelationCountAndMap('user.collectionsCount', 'user.collections')
+      .loadRelationCountAndMap('user.schedulesCount', 'user.schedules')
+      .where('user.id = :userId', { userId })
+      .getOne();
   }
 
   async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
