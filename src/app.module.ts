@@ -14,6 +14,8 @@ import { ClothesController } from './modules/clothes/clothes.controller';
 import { ClothesModule } from './modules/clothes/clothes.module';
 import { CollectionController } from './modules/collections/collection.controller';
 import { CollectionModule } from './modules/collections/collection.module';
+import { ScheduleModule } from './modules/schedules/schedule.module';
+import { ScheduleController } from './modules/schedules/schedule.controller';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { CollectionModule } from './modules/collections/collection.module';
     FileUploadModule,
     ClothesModule,
     CollectionModule,
+    ScheduleModule,
   ],
   controllers: [
     UserController,
@@ -33,6 +36,7 @@ import { CollectionModule } from './modules/collections/collection.module';
     FileUploadController,
     ClothesController,
     CollectionController,
+    ScheduleController,
   ],
   providers: [JwtAuth],
 })
