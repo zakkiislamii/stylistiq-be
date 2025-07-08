@@ -10,6 +10,12 @@ import { UserBodyProfileModule } from './modules/userBodyProfile/userBodyProfile
 import { UserBodyProfileController } from './modules/userBodyProfile/userBodyProfile.controller';
 import { FileUploadController } from './modules/fileUpload/fileUpload.controller';
 import { FileUploadModule } from './modules/fileUpload/fileUpload.module';
+import { ClothesController } from './modules/clothes/clothes.controller';
+import { ClothesModule } from './modules/clothes/clothes.module';
+import { CollectionController } from './modules/collections/collection.controller';
+import { CollectionModule } from './modules/collections/collection.module';
+import { ScheduleModule } from './modules/schedules/schedule.module';
+import { ScheduleController } from './modules/schedules/schedule.controller';
 
 @Module({
   imports: [
@@ -19,12 +25,18 @@ import { FileUploadModule } from './modules/fileUpload/fileUpload.module';
     JwtTokenModule,
     UserBodyProfileModule,
     FileUploadModule,
+    ClothesModule,
+    CollectionModule,
+    ScheduleModule,
   ],
   controllers: [
     UserController,
     AuthController,
     UserBodyProfileController,
     FileUploadController,
+    ClothesController,
+    CollectionController,
+    ScheduleController,
   ],
   providers: [JwtAuth],
 })

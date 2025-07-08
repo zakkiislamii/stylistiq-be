@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -30,7 +30,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuth)
-  @Post('')
+  @Put('')
   async updateProfile(@Req() req: Request, @Body() dto: UpdateUserDto) {
     const user = req['user'];
     const userId = user.userId;

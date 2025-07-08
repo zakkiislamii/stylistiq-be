@@ -50,7 +50,7 @@ export class FileUploadController {
     return ResponseHelper.success(data, 'Upload Success', HttpStatus.OK);
   }
 
-  @Get('profile/:userId/:filename')
+  @Get(':userId/profile/:filename')
   getProfilePhoto(
     @Param('userId') userId: string,
     @Param('filename') filename: string,
@@ -61,8 +61,46 @@ export class FileUploadController {
       'uploads',
       'private',
       'user',
-      'profile',
       userId,
+      'profile',
+      filename,
+    );
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('File not found');
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+
+    switch (ext) {
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        contentType = 'image/jpeg';
+        break;
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.sendFile(filePath);
+  }
+
+  @Get(':userId/collection/:filename')
+  getCollectionPhoto(
+    @Param('userId') userId: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    const filePath = path.join(
+      process.cwd(),
+      'uploads',
+      'private',
+      'user',
+      userId,
+      'collection',
       filename,
     );
 

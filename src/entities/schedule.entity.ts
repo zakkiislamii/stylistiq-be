@@ -23,8 +23,8 @@ export class Schedule {
   @Column({ nullable: true })
   note?: string;
 
-  @Column({ type: 'date', nullable: true })
-  reminder?: Timestamp;
+  @Column({ type: 'timestamp', nullable: true })
+  reminder?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Timestamp;
