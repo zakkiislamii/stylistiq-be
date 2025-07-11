@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,7 +20,7 @@ export class UserBodyProfileController {
   ) {}
 
   @UseGuards(JwtAuth)
-  @Post('')
+  @Put('')
   async updateBodyProfile(
     @Req() req: Request,
     @Body() dto: UpdateUserBodyProfileDto,
