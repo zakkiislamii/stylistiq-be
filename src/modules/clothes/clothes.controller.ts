@@ -1,13 +1,16 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpStatus,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Req,
+  UploadedFiles,
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -17,6 +20,8 @@ import { ClothesService } from './clothes.service';
 import { UpdateClothesDto } from './dto/updateClothes.dto';
 import { CreateClothesDto } from './dto/createClothes.dto';
 import { DeleteClothesDto } from './dto/deleteClothes.dto';
+import { folder } from 'src/common/constants/variabel.constants';
+import { DynamicFilesInterceptor } from 'src/common/interceptors/dynamicFiles.interceptor';
 
 @Controller('clothes')
 export class ClothesController {
@@ -89,5 +94,48 @@ export class ClothesController {
       'Clothes deleted successfully',
       HttpStatus.OK,
     );
+  }
+
+  @UseGuards(JwtAuth)
+  @Post('analyze')
+  @DynamicFilesInterceptor(
+    'images',
+    (req: Request) => {
+      const userId = req['user'].userId;
+      const paths = folder(userId).clothes;
+      return paths;
+    },
+    {
+      multiple: true,
+      maxCount: 10,
+      fileSize: 5 * 1024 * 1024,
+      allowedMimes: ['image/jpeg', 'image/png', 'image/jpg'],
+    },
+  )
+  async clothesAnalyze(
+    @Req() req: Request,
+    @UploadedFiles(
+      new ParseFilePipe({
+        fileIsRequired: true,
+      }),
+    )
+    images: Array<Express.Multer.File>,
+  ) {
+    const userId = req['user'].userId;
+
+    if (!images || images.length === 0) {
+      throw new BadRequestException('No images were uploaded.');
+    }
+
+    const results = await this.clothesService.clothesAnalyze(userId, images);
+    const createdClothes = await this.clothesService.createManyClothes(userId, {
+      clothes: results,
+    } as CreateClothesDto);
+
+    return {
+      message: 'Images uploaded and processed successfully!',
+      userId: userId,
+      clothes: createdClothes,
+    };
   }
 }
