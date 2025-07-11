@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from 'src/modules/user/dto/updateUser.dto';
 import { User } from 'src/entities/user.entity';
 import { UserRepository } from 'src/modules/user/user.repository';
+import { BASE_URL } from 'src/configs/env.config';
 
 @Injectable()
 export class UserService {
@@ -11,7 +12,14 @@ export class UserService {
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    return await this.userRepository.findUserById(userId);
+    const data = await this.userRepository.findUserById(userId);
+    if (!data) {
+      return null;
+    }
+    if (data.profilePhoto) {
+      data.profilePhoto = `${BASE_URL}/file/${userId}/profile/${data.profilePhoto}`;
+    }
+    return data;
   }
 
   async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {

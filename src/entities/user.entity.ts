@@ -6,7 +6,6 @@ import {
   UpdateDateColumn,
   OneToMany,
   OneToOne,
-  JoinColumn,
   Timestamp,
 } from 'typeorm';
 import { Clothes } from './clothe.entity';
@@ -57,6 +56,5 @@ export class User {
   collections: Collection[];
 
   @OneToOne(() => UserBodyProfile, (profile) => profile.user, { cascade: true })
-  @JoinColumn({ name: 'body_profile_id' })
   bodyProfile: UserBodyProfile;
 }
