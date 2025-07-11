@@ -16,7 +16,7 @@ export class UserRepository {
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    return this.userRepository
+    const data = await this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.bodyProfile', 'bodyProfile')
       .loadRelationCountAndMap('user.clothesCount', 'user.clothes')
@@ -24,6 +24,15 @@ export class UserRepository {
       .loadRelationCountAndMap('user.schedulesCount', 'user.schedules')
       .where('user.id = :userId', { userId })
       .getOne();
+
+    if (!data) {
+      return null;
+    }
+
+    if (data.profilePhoto) {
+      data.profilePhoto = path.basename(data.profilePhoto);
+    }
+    return data;
   }
 
   async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
