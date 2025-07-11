@@ -125,4 +125,42 @@ export class FileUploadController {
     res.setHeader('Cache-Control', 'public, max-age=31536000');
     res.sendFile(filePath);
   }
+
+  @Get(':userId/clothes/:filename')
+  getClothesPhoto(
+    @Param('userId') userId: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    const filePath = path.join(
+      process.cwd(),
+      'uploads',
+      'private',
+      'user',
+      userId,
+      'clothes',
+      filename,
+    );
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('File not found');
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+
+    switch (ext) {
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        contentType = 'image/jpeg';
+        break;
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.sendFile(filePath);
+  }
 }
