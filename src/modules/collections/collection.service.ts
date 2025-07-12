@@ -4,6 +4,7 @@ import { Collection } from 'src/entities/collection.entity';
 import { CreateCollectionDto } from './dto/createCollection.dto';
 import { UpdateCollectionDto } from './dto/updateCollection.dto';
 import { DeleteCollectionDto } from './dto/deleteCollection.dto';
+import { PaginationCollectionDto } from './dto/paginationCollection,dto';
 
 @Injectable()
 export class CollectionService {
@@ -17,8 +18,14 @@ export class CollectionService {
     return clothes?.user.id == userId ? clothes : null;
   }
 
-  async findByUser(userId: string): Promise<Collection[]> {
-    const clothes = await this.collectionRepository.findByUser(userId);
+  async findByUser(
+    paginationDto: PaginationCollectionDto,
+    userId: string,
+  ): Promise<Collection[]> {
+    const clothes = await this.collectionRepository.findByUser(
+      paginationDto,
+      userId,
+    );
     return clothes;
   }
 

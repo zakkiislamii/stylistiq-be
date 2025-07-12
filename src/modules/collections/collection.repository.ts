@@ -7,6 +7,7 @@ import { CreateCollectionDto } from './dto/createCollection.dto';
 import { UpdateCollectionDto } from './dto/updateCollection.dto';
 import { DeleteCollectionDto } from './dto/deleteCollection.dto';
 import { Clothes } from 'src/entities/clothe.entity';
+import { PaginationCollectionDto } from './dto/paginationCollection,dto';
 
 @Injectable()
 export class CollectionRepository {
@@ -22,10 +23,18 @@ export class CollectionRepository {
     });
   }
 
-  async findByUser(userId: string): Promise<Collection[]> {
+  async findByUser(
+    paginationDto: PaginationCollectionDto,
+    userId: string,
+  ): Promise<Collection[]> {
+    const page = paginationDto.page ?? 1;
+    const limit = paginationDto.limit ?? 10;
+
     return this.collectionRepository.find({
       where: { user: { id: userId } },
       relations: ['user', 'clothes'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 

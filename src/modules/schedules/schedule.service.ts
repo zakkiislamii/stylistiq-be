@@ -4,6 +4,7 @@ import { Schedule } from 'src/entities/schedule.entity';
 import { CreateScheduleDto } from './dto/createSchedule.dto';
 import { UpdateScheduleDto } from './dto/updateSchedule.dto';
 import { DeleteScheduleDto } from './dto/deleteSchedule.dto';
+import { PaginationScheduleDto } from './dto/paginationSchedule.dto';
 
 @Injectable()
 export class ScheduleService {
@@ -17,8 +18,11 @@ export class ScheduleService {
     return schedule;
   }
 
-  async findByUser(userId: string): Promise<Schedule[]> {
-    return this.scheduleRepository.findByUser(userId);
+  async findByUser(
+    paginationDto: PaginationScheduleDto,
+    userId: string,
+  ): Promise<Schedule[]> {
+    return this.scheduleRepository.findByUser(paginationDto, userId);
   }
 
   async findByDate(userId: string, date: string): Promise<Schedule[]> {
