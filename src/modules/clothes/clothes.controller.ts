@@ -9,6 +9,7 @@ import {
   ParseFilePipe,
   Post,
   Put,
+  Query,
   Req,
   UploadedFiles,
   UseGuards,
@@ -22,6 +23,7 @@ import { CreateClothesDto } from './dto/createClothes.dto';
 import { DeleteClothesDto } from './dto/deleteClothes.dto';
 import { folder } from 'src/common/constants/variabel.constants';
 import { DynamicFilesInterceptor } from 'src/common/interceptors/dynamicFiles.interceptor';
+import { PaginationClothesDto } from './dto/paginationClothes,dto';
 
 @Controller('clothes')
 export class ClothesController {
@@ -41,9 +43,12 @@ export class ClothesController {
 
   @UseGuards(JwtAuth)
   @Get()
-  async getClothesByUser(@Req() req: Request) {
+  async getClothesByUser(
+    @Query() paginationDto: PaginationClothesDto,
+    @Req() req: Request,
+  ) {
     const userId = req['user'].userId;
-    const data = await this.clothesService.findByUser(userId);
+    const data = await this.clothesService.findByUser(paginationDto, userId);
     return ResponseHelper.success(
       data,
       "Successfully retrieved user's clothes",

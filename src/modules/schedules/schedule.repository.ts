@@ -1,11 +1,20 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { In, Raw, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Raw,
+  Repository,
+} from 'typeorm';
 import { Schedule } from 'src/entities/schedule.entity';
 import { CreateScheduleDto } from './dto/createSchedule.dto';
 import { UpdateScheduleDto } from './dto/updateSchedule.dto';
 import { DeleteScheduleDto } from './dto/deleteSchedule.dto';
 import { User } from 'src/entities/user.entity';
 import { Clothes } from 'src/entities/clothe.entity';
+import { PaginationScheduleDto } from './dto/paginationSchedule.dto';
 
 @Injectable()
 export class ScheduleRepository {
@@ -21,9 +30,38 @@ export class ScheduleRepository {
     });
   }
 
-  async findByUser(userId: string): Promise<Schedule[]> {
+  async findByUser(
+    paginationDto: PaginationScheduleDto,
+    userId: string,
+  ): Promise<Schedule[]> {
+    const { startDate, endDate } = paginationDto;
+
+    const where: FindOptionsWhere<Schedule> = {
+      user: { id: userId },
+    };
+
+    if (startDate && endDate) {
+      const startOfDay = new Date(startDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      where.date = Between(startOfDay, endOfDay);
+    } else if (startDate) {
+      const startOfDay = new Date(startDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      where.date = MoreThanOrEqual(startOfDay);
+    } else if (endDate) {
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      where.date = LessThanOrEqual(endOfDay);
+    }
+
     return this.scheduleRepository.find({
-      where: { user: { id: userId } },
+      where,
       relations: ['user', 'clothes'],
     });
   }

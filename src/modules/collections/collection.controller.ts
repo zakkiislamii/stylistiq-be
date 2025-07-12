@@ -8,6 +8,7 @@ import {
   ParseFilePipe,
   Post,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -24,6 +25,7 @@ import { folder } from 'src/common/constants/variabel.constants';
 import { BASE_URL } from 'src/configs/env.config';
 import { FileUploadService } from '../fileUpload/fileUpload.service';
 import * as path from 'path';
+import { PaginationCollectionDto } from './dto/paginationCollection,dto';
 
 @Controller('collection')
 export class CollectionController {
@@ -47,9 +49,12 @@ export class CollectionController {
 
   @UseGuards(JwtAuth)
   @Get()
-  async getCollectionByUser(@Req() req: Request) {
+  async getCollectionByUser(
+    @Query() paginationDto: PaginationCollectionDto,
+    @Req() req: Request,
+  ) {
     const userId = req['user'].userId;
-    const data = await this.collectionService.findByUser(userId);
+    const data = await this.collectionService.findByUser(paginationDto, userId);
     return ResponseHelper.success(
       data,
       "Successfully retrieved user's collections",
