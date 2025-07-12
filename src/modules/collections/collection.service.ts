@@ -11,11 +11,16 @@ export class CollectionService {
   constructor(private readonly collectionRepository: CollectionRepository) {}
 
   async findById(
-    clothesId: string,
+    collectionId: string,
     userId: string,
   ): Promise<Collection | null> {
-    const clothes = await this.collectionRepository.findById(clothesId);
-    return clothes?.user.id == userId ? clothes : null;
+    const collection = await this.collectionRepository.findById(collectionId);
+
+    if (collection?.user.id != userId) {
+      throw new NotFoundException('No matching collection found!');
+    }
+
+    return collection;
   }
 
   async findByUser(

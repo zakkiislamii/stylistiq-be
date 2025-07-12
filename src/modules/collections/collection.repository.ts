@@ -16,9 +16,9 @@ export class CollectionRepository {
     private collectionRepository: Repository<Collection>,
   ) {}
 
-  async findById(clothesId: string): Promise<Collection | null> {
+  async findById(collectionId: string): Promise<Collection | null> {
     return this.collectionRepository.findOneOrFail({
-      where: { id: clothesId },
+      where: { id: collectionId },
       relations: ['user', 'clothes'],
     });
   }
