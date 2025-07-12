@@ -1,9 +1,10 @@
-import { IsEnum, IsOptional, IsString, IsUUID, IsArray } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 
 export class UpdateClothesDto {
+  @IsOptional()
   @IsEnum(ClothesCategory)
-  category: ClothesCategory;
+  category?: ClothesCategory;
 
   @IsOptional()
   @IsString()
@@ -20,14 +21,4 @@ export class UpdateClothesDto {
   @IsOptional()
   @IsString()
   note?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  scheduleIds?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  collectionIds?: string[];
 }

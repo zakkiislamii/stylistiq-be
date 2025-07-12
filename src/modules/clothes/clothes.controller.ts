@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
 } from '@nestjs/common';
@@ -24,10 +25,16 @@ import { DeleteClothesDto } from './dto/deleteClothes.dto';
 import { folder } from 'src/common/constants/variabel.constants';
 import { DynamicFilesInterceptor } from 'src/common/interceptors/dynamicFiles.interceptor';
 import { PaginationClothesDto } from './dto/paginationClothes,dto';
+import { DynamicFileInterceptor } from 'src/common/interceptors/dynamicFile.interceptor';
+import { BASE_URL } from 'src/configs/env.config';
+import { FileUploadService } from '../fileUpload/fileUpload.service';
 
 @Controller('clothes')
 export class ClothesController {
-  constructor(private readonly clothesService: ClothesService) {}
+  constructor(
+    private readonly clothesService: ClothesService,
+    private readonly fileUploadService: FileUploadService,
+  ) {}
   @UseGuards(JwtAuth)
   @Get(':id')
   async getClothesDetail(@Req() req: Request, @Param('id') id: string) {
@@ -70,18 +77,40 @@ export class ClothesController {
 
   @UseGuards(JwtAuth)
   @Put(':id')
+  @DynamicFileInterceptor('image', (req: Request) => {
+    const userId = req['user'].userId;
+    const paths = folder(userId).clothes;
+    return paths;
+  })
   async updateClothes(
     @Req() req: Request,
     @Body() dto: UpdateClothesDto,
     @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+      }),
+    )
+    imageFile: Express.Multer.File,
   ) {
     const userId = req['user'].userId;
     const clothesId = id;
+    if (imageFile) {
+      const filename = imageFile.filename;
+      dto.image = `${BASE_URL}/file/${userId}/clothes/${filename}`;
+
+      await this.fileUploadService.deleteOldClothesImage({
+        userId: userId,
+        clothesId: clothesId,
+      });
+    }
+
     const data = await this.clothesService.updateClothes(
       clothesId,
       userId,
       dto,
     );
+
     return ResponseHelper.success(
       data,
       'Clothes updated successfully',

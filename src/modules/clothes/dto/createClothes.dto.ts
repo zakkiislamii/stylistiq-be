@@ -3,7 +3,6 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  IsUUID,
   IsArray,
   ValidateNested,
 } from 'class-validator';
@@ -35,14 +34,4 @@ export class CreateClothesInput {
   @IsOptional()
   @IsString()
   note?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  scheduleIds?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  collectionIds?: string[];
 }
