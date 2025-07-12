@@ -13,6 +13,7 @@ import { BASE_URL, GEMINI_API_KEY } from 'src/configs/env.config';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ClothesAnalysisResult } from './dto/analyzeClothes.dto';
+import { PaginationClothesDto } from './dto/paginationClothes,dto';
 
 @Injectable()
 export class ClothesService {
@@ -23,8 +24,14 @@ export class ClothesService {
     return clothes?.user.id == userId ? clothes : null;
   }
 
-  async findByUser(userId: string): Promise<Clothes[]> {
-    const clothes = await this.clothesRepository.findByUser(userId);
+  async findByUser(
+    paginationDto: PaginationClothesDto,
+    userId: string,
+  ): Promise<Clothes[]> {
+    const clothes = await this.clothesRepository.findByUser(
+      paginationDto,
+      userId,
+    );
     return clothes;
   }
 

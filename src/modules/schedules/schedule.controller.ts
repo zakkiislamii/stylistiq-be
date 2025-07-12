@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { ScheduleService } from './schedule.service';
 import { CreateScheduleDto } from './dto/createSchedule.dto';
 import { UpdateScheduleDto } from './dto/updateSchedule.dto';
 import { DeleteScheduleDto } from './dto/deleteSchedule.dto';
+import { PaginationScheduleDto } from './dto/paginationSchedule.dto';
 
 @Controller('schedule')
 export class ScheduleController {
@@ -37,9 +39,12 @@ export class ScheduleController {
 
   @UseGuards(JwtAuth)
   @Get()
-  async getSchedulesByUser(@Req() req: Request) {
+  async getSchedulesByUser(
+    @Query() paginationDto: PaginationScheduleDto,
+    @Req() req: Request,
+  ) {
     const userId = req['user'].userId;
-    const data = await this.scheduleService.findByUser(userId);
+    const data = await this.scheduleService.findByUser(paginationDto, userId);
     return ResponseHelper.success(
       data,
       "Successfully retrieved user's schedules",

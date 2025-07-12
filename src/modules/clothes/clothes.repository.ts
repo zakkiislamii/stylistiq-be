@@ -6,6 +6,7 @@ import { Clothes } from 'src/entities/clothe.entity';
 import { UpdateClothesDto } from './dto/updateClothes.dto';
 import { CreateClothesInput } from './dto/createClothes.dto';
 import { DeleteClothesDto } from './dto/deleteClothes.dto';
+import { PaginationClothesDto } from './dto/paginationClothes,dto';
 
 @Injectable()
 export class ClothesRepository {
@@ -21,10 +22,18 @@ export class ClothesRepository {
     });
   }
 
-  async findByUser(userId: string): Promise<Clothes[]> {
+  async findByUser(
+    paginationDto: PaginationClothesDto,
+    userId: string,
+  ): Promise<Clothes[]> {
+    const page = paginationDto.page ?? 1;
+    const limit = paginationDto.limit ?? 10;
+
     return this.clothesRepository.find({
       where: { user: { id: userId } },
       relations: ['user', 'schedules', 'collections'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 
