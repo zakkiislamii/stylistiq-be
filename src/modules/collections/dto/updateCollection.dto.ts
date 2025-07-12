@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsOptional, IsString, IsUUID, IsArray } from 'class-validator';
 
 export class UpdateCollectionDto {
@@ -11,6 +12,12 @@ export class UpdateCollectionDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('all', { each: true })
+  @IsUUID('4', { each: true })
+  @Transform(({ value }) => {
+    if (Array.isArray(value) && value.length === 1 && value[0] === '') {
+      return [];
+    }
+    return undefined;
+  })
   clothesIds?: string[];
 }

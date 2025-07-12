@@ -77,6 +77,7 @@ export class ClothesService {
       userId,
       updateData,
     );
+
     if (!clothes) {
       throw new NotFoundException('Clothes not found');
     }

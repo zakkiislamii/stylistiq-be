@@ -115,17 +115,14 @@ export class ScheduleRepository {
       throw new NotFoundException(`Schedule with ID ${scheduleId} not found`);
     }
 
-    // 1. Destructure clothesIds from the DTO
     const { clothesIds, ...scheduleData } = dto;
 
-    // 2. Merge only the schedule fields (like note, date)
     const updatedSchedule = this.scheduleRepository.merge(
       existingSchedule,
       scheduleData,
     );
 
-    // 3. If new clothesIds are provided, update the relationship
-    if (clothesIds) {
+    if (Array.isArray(clothesIds)) {
       updatedSchedule.clothes = clothesIds.map((id) => ({ id }) as Clothes);
     }
 
