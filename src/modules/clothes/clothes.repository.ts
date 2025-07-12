@@ -63,17 +63,15 @@ export class ClothesRepository {
     userId: string,
     dto: UpdateClothesDto,
   ): Promise<Clothes> {
-    const existingClothes = await this.clothesRepository.findOne({
+    await this.clothesRepository.update(
+      { id: clothesId, user: { id: userId } },
+      dto,
+    );
+
+    return this.clothesRepository.findOneOrFail({
       where: { id: clothesId, user: { id: userId } },
-      relations: ['user'],
+      relations: ['schedules', 'collections'],
     });
-
-    const updatedClothes = {
-      ...existingClothes,
-      ...dto,
-    };
-
-    return this.clothesRepository.save(updatedClothes);
   }
 
   async deleteClothes(userId: string, dto: DeleteClothesDto): Promise<boolean> {

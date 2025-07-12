@@ -21,7 +21,12 @@ export class ClothesService {
 
   async findById(clothesId: string, userId: string): Promise<Clothes | null> {
     const clothes = await this.clothesRepository.findById(clothesId);
-    return clothes?.user.id == userId ? clothes : null;
+
+    if (clothes?.user.id != userId) {
+      throw new NotFoundException('No matching clothes found!');
+    }
+
+    return clothes;
   }
 
   async findByUser(
@@ -72,6 +77,7 @@ export class ClothesService {
       userId,
       updateData,
     );
+
     if (!clothes) {
       throw new NotFoundException('Clothes not found');
     }

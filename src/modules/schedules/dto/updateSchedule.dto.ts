@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsISO8601,
@@ -6,12 +7,11 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
-import { Timestamp } from 'typeorm';
 
 export class UpdateScheduleDto {
   @IsISO8601({ strict: true })
   @IsNotEmpty()
-  date: Date;
+  date: string;
 
   @IsString()
   @IsOptional()
@@ -19,10 +19,16 @@ export class UpdateScheduleDto {
 
   @IsISO8601({ strict: true })
   @IsOptional()
-  reminder?: Timestamp;
+  reminder?: string;
 
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  @IsOptional()
+  @Transform(({ value }) => {
+    if (Array.isArray(value) && value.length === 1 && value[0] === '') {
+      return [];
+    }
+    return undefined;
+  })
   clothesIds?: string[];
 }

@@ -16,9 +16,9 @@ export class CollectionRepository {
     private collectionRepository: Repository<Collection>,
   ) {}
 
-  async findById(clothesId: string): Promise<Collection | null> {
+  async findById(collectionId: string): Promise<Collection | null> {
     return this.collectionRepository.findOneOrFail({
-      where: { id: clothesId },
+      where: { id: collectionId },
       relations: ['user', 'clothes'],
     });
   }
@@ -72,12 +72,23 @@ export class CollectionRepository {
       relations: ['user', 'clothes'],
     });
 
+    const { clothesIds, ...collectionData } = dto;
+
     const updatedCollection = {
       ...existingCollection,
-      ...dto,
+      ...collectionData,
     };
 
-    return this.collectionRepository.save(updatedCollection);
+    if (Array.isArray(clothesIds)) {
+      updatedCollection.clothes = clothesIds.map((id) => ({ id }) as Clothes);
+    }
+
+    await this.collectionRepository.save(updatedCollection);
+
+    return this.collectionRepository.findOneOrFail({
+      where: { id: collectionId, user: { id: userId } },
+      relations: ['user', 'clothes'],
+    });
   }
 
   async deleteCollection(
