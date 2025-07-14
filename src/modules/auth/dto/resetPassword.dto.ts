@@ -8,12 +8,11 @@ import {
 } from 'class-validator';
 import { PasswordMatchConstraint } from 'src/common/validators/password.validator';
 
-export class RegisterDto {
+export class ResetPasswordDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  @IsString()
   @IsNotEmpty()
   @MinLength(8, { message: 'Password must be at least 8 characters' })
   @Matches(
@@ -23,10 +22,10 @@ export class RegisterDto {
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
     },
   )
-  password: string;
+  newPassword: string;
 
   @IsString()
   @IsNotEmpty()
-  @Validate(PasswordMatchConstraint, ['password'])
+  @Validate(PasswordMatchConstraint, ['newPassword'])
   confirmPassword: string;
 }
