@@ -10,6 +10,9 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
 import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { ForgotPasswordDto } from 'src/modules/auth/dto/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/modules/auth/dto/resetPassword.dto';
+import { ChangePasswordDto } from 'src/modules/auth/dto/changePassword.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginFirebaseDto } from './dto/loginFirebase.dto';
 
@@ -69,5 +72,76 @@ export class AuthService {
     const token = this.jwtTokenService.sign(payload);
 
     return { token };
+  }
+
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.authRepository.findByEmail(forgotPasswordDto.email);
+
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    }
+
+    return { message: 'Password reset instructions sent to your email' };
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const { email, newPassword, confirmPassword } = resetPasswordDto;
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Password confirmation does not match');
+    }
+
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    }
+
+    const saltOrRounds = 10;
+    const passwordHash = await bcrypt.hash(newPassword, saltOrRounds);
+    await this.authRepository.resetPassword(email, passwordHash);
+    return { message: 'Password reset successful' };
+  }
+
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const { oldPassword, newPassword, confirmPassword } = changePasswordDto;
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Password confirmation does not match');
+    }
+
+    const user = await this.authRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Password not set');
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    if (oldPassword === newPassword) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    const saltOrRounds = 10;
+    const passwordHash = await bcrypt.hash(newPassword, saltOrRounds);
+    await this.authRepository.updatePassword(userId, passwordHash);
+    return { message: 'Password changed successfully' };
   }
 }
