@@ -28,7 +28,7 @@ export class UpdateScheduleDto {
     if (Array.isArray(value) && value.length === 1 && value[0] === '') {
       return [];
     }
-    return undefined;
+    return value as string[];
   })
   clothesIds?: string[];
 }

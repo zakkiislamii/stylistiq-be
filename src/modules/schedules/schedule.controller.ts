@@ -92,6 +92,7 @@ export class ScheduleController {
     @Param('id') id: string,
   ) {
     const userId = req['user'].userId;
+    console.log(dto);
     const data = await this.scheduleService.updateSchedule(id, userId, dto);
     return ResponseHelper.success(
       data,
