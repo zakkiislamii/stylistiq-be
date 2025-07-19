@@ -5,6 +5,7 @@ import { CreateCollectionDto } from './dto/createCollection.dto';
 import { UpdateCollectionDto } from './dto/updateCollection.dto';
 import { DeleteCollectionDto } from './dto/deleteCollection.dto';
 import { PaginationCollectionDto } from './dto/paginationCollection,dto';
+import { AddClothesToCollectionDto } from './dto/addClothesToCollection.dto';
 
 @Injectable()
 export class CollectionService {
@@ -76,5 +77,28 @@ export class CollectionService {
       dto,
     );
     return collections;
+  }
+
+  async addClothesToCollection(
+    userId: string,
+    existingCollection: Collection,
+    dto: AddClothesToCollectionDto,
+  ): Promise<Collection> {
+    const existingClothesIds = existingCollection.clothes.map(
+      (cloth) => cloth.id,
+    );
+    const updateDto = {
+      clothesIds: Array.from(
+        new Set([...dto.clothesIds, ...existingClothesIds]),
+      ),
+    } as UpdateCollectionDto;
+
+    const updatedCollection = await this.collectionRepository.updateCollection(
+      existingCollection.id,
+      userId,
+      updateDto,
+    );
+
+    return updatedCollection;
   }
 }
