@@ -14,6 +14,7 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      ELASTIC_SEARCH_URL: ${ELASTIC_SEARCH_URL}
     depends_on:
       mysql:
         condition: service_healthy
@@ -41,6 +42,22 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  # elasticsearch:
+  #   image: elasticsearch:8.11.2
+  #   container_name: elasticsearch_stylistiq
+  #   environment:
+  #     - discovery.type=single-node
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ports:
+  #     - "127.0.0.19200:9200" # Expose Elasticsearch HTTP port
+  #   volumes:
+  #     - es_data:/usr/share/elasticsearch/data # Persist Elasticsearch data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\|yellow\"'"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
 
 volumes:
   mysql_data:
