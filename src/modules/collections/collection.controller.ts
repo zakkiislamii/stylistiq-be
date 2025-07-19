@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseFilePipe,
   Post,
@@ -26,6 +27,7 @@ import { BASE_URL } from 'src/configs/env.config';
 import { FileUploadService } from '../fileUpload/fileUpload.service';
 import * as path from 'path';
 import { PaginationCollectionDto } from './dto/paginationCollection,dto';
+import { AddClothesToCollectionDto } from './dto/addClothesToCollection.dto';
 
 @Controller('collection')
 export class CollectionController {
@@ -164,6 +166,38 @@ export class CollectionController {
 
     return ResponseHelper.success(
       true,
+      'Collection deleted successfully',
+      HttpStatus.OK,
+    );
+  }
+
+  @UseGuards(JwtAuth)
+  @Post('/:id/add')
+  async addClothesToCollection(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: AddClothesToCollectionDto,
+  ) {
+    const userId = req['user'].userId;
+    const collectionId = id;
+
+    const existingCollection = await this.collectionService.findById(
+      collectionId,
+      userId,
+    );
+    if (!existingCollection) {
+      throw new NotFoundException('No Collection Fuund');
+    }
+
+    const updatedCollection =
+      await this.collectionService.addClothesToCollection(
+        userId,
+        existingCollection,
+        dto,
+      );
+
+    return ResponseHelper.success(
+      updatedCollection,
       'Collection deleted successfully',
       HttpStatus.OK,
     );
