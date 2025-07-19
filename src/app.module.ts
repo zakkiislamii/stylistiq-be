@@ -16,7 +16,6 @@ import { CollectionController } from './modules/collections/collection.controlle
 import { CollectionModule } from './modules/collections/collection.module';
 import { ScheduleModule } from './modules/schedules/schedule.module';
 import { ScheduleController } from './modules/schedules/schedule.controller';
-import { ElasticSearchModule } from './modules/elasticSearch/elasticSearch.module';
 
 @Module({
   imports: [
@@ -29,7 +28,7 @@ import { ElasticSearchModule } from './modules/elasticSearch/elasticSearch.modul
     ClothesModule,
     CollectionModule,
     ScheduleModule,
-    ElasticSearchModule,
+    // ElasticSearchModule,
   ],
   controllers: [
     UserController,
