@@ -28,7 +28,7 @@ import { PaginationClothesDto } from './dto/paginationClothes,dto';
 import { DynamicFileInterceptor } from 'src/common/interceptors/dynamicFile.interceptor';
 import { BASE_URL } from 'src/configs/env.config';
 import { FileUploadService } from '../fileUpload/fileUpload.service';
-import { SearchService } from '../elasticSearch/elasticSearch.service';
+import { SearchService } from '../elasticSearch/elasticClothesSearch.service';
 import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
 import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 import { UserService } from '../user/user.service';
