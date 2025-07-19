@@ -28,12 +28,19 @@ import { PaginationClothesDto } from './dto/paginationClothes,dto';
 import { DynamicFileInterceptor } from 'src/common/interceptors/dynamicFile.interceptor';
 import { BASE_URL } from 'src/configs/env.config';
 import { FileUploadService } from '../fileUpload/fileUpload.service';
+import { SearchService } from '../elasticSearch/elasticSearch.service';
+import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
+import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
+import { UserService } from '../user/user.service';
+import { MatchClothesDto } from './dto/matchClothes.dto';
 
 @Controller('clothes')
 export class ClothesController {
   constructor(
     private readonly clothesService: ClothesService,
+    private readonly userService: UserService,
     private readonly fileUploadService: FileUploadService,
+    private readonly searchService: SearchService,
   ) {}
   @UseGuards(JwtAuth)
   @Get(':id')
@@ -55,7 +62,7 @@ export class ClothesController {
     @Req() req: Request,
   ) {
     const userId = req['user'].userId;
-    const data = await this.clothesService.findByUser(paginationDto, userId);
+    const data = await this.clothesService.findByUser(userId, paginationDto);
     return ResponseHelper.success(
       data,
       "Successfully retrieved user's clothes",
@@ -68,6 +75,7 @@ export class ClothesController {
   async createManyClothes(@Req() req: Request, @Body() dtos: CreateClothesDto) {
     const userId = req['user'].userId;
     const data = await this.clothesService.createManyClothes(userId, dtos);
+
     return ResponseHelper.success(
       data,
       'Clothes created successfully',
@@ -111,6 +119,22 @@ export class ClothesController {
       dto,
     );
 
+    const document = {
+      category: data.category,
+      itemType: data.itemType ?? null,
+      color: data.color ?? null,
+      note: data.note ?? null,
+      status: data.status,
+      images: data.image ?? null,
+      userId: userId,
+    };
+
+    await this.searchService.updateClothes(
+      'clothes-index',
+      clothesId,
+      document,
+    );
+
     return ResponseHelper.success(
       data,
       'Clothes updated successfully',
@@ -123,6 +147,11 @@ export class ClothesController {
   async deleteClothes(@Req() req: Request, @Body() dto: DeleteClothesDto) {
     const userId = req['user'].userId;
     const data = await this.clothesService.deleteClothes(userId, dto);
+
+    for (const id of dto.clothesIds) {
+      await this.searchService.deleteClothes('clothes-index', id);
+    }
+
     return ResponseHelper.success(
       data,
       'Clothes deleted successfully',
@@ -166,10 +195,67 @@ export class ClothesController {
       clothes: results,
     } as CreateClothesDto);
 
+    for (const clothes of createdClothes) {
+      const document = {
+        category: clothes.category,
+        itemType: clothes.itemType ?? null,
+        color: clothes.color ?? null,
+        note: clothes.note ?? null,
+        status: clothes.status,
+        images: clothes.image ?? null,
+        userId: userId,
+      };
+
+      // Assuming `cloth.id` is the unique ID from your database
+      await this.searchService.indexClothes(
+        'clothes-index',
+        clothes.id,
+        document,
+      );
+    }
+
     return {
       message: 'Images uploaded and processed successfully!',
       userId: userId,
       clothes: createdClothes,
     };
+  }
+
+  @UseGuards(JwtAuth)
+  @Post('match')
+  async matchClothes(@Req() req: Request, @Body() dto: MatchClothesDto) {
+    const userId = req['user'].userId;
+    const user = await this.userService.findUserById(userId);
+
+    const ownedClothes = await this.clothesService.findByUser(
+      userId,
+      undefined,
+      ClothesStatus.DIMILIKI,
+    );
+
+    const groupedData = {};
+    Object.values(ClothesCategory).forEach((category) => {
+      groupedData[category] = [];
+    });
+
+    const data = ownedClothes.reduce((acc, clothes) => {
+      const { user, collections, schedules, ...clothesWithoutUser } = clothes;
+      acc[clothes.category].push(clothesWithoutUser);
+      return acc;
+    }, groupedData);
+
+    const result = await this.clothesService.matchClothes(
+      user,
+      data,
+      dto.clothesIds,
+    );
+
+    const clothesResult = await this.clothesService.findAllByIds(result);
+
+    return ResponseHelper.success(
+      clothesResult,
+      'Owned clothes fetched successfully',
+      HttpStatus.OK,
+    );
   }
 }

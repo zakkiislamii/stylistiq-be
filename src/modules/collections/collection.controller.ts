@@ -125,12 +125,12 @@ export class CollectionController {
     if (imageFile) {
       const filename = imageFile.filename;
       dto.image = `${BASE_URL}/file/${userId}/collection/${filename}`;
-    }
 
-    await this.fileUploadService.deleteOldCollectionImage({
-      userId: userId,
-      collectionId: collectionId,
-    });
+      await this.fileUploadService.deleteOldCollectionImage({
+        userId: userId,
+        collectionId: collectionId,
+      });
+    }
 
     const data = await this.collectionService.updateCollection(
       collectionId,

@@ -1,5 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
+import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
 
 export class UpdateClothesDto {
   @IsOptional()
@@ -21,4 +22,8 @@ export class UpdateClothesDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  @IsOptional()
+  @IsEnum(ClothesStatus)
+  status?: ClothesStatus;
 }

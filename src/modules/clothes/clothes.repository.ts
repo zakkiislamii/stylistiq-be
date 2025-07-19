@@ -1,12 +1,13 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, In, Repository } from 'typeorm';
 import * as path from 'path';
 import { Clothes } from 'src/entities/clothe.entity';
 import { UpdateClothesDto } from './dto/updateClothes.dto';
 import { CreateClothesInput } from './dto/createClothes.dto';
 import { DeleteClothesDto } from './dto/deleteClothes.dto';
 import { PaginationClothesDto } from './dto/paginationClothes,dto';
+import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
 
 @Injectable()
 export class ClothesRepository {
@@ -22,19 +23,44 @@ export class ClothesRepository {
     });
   }
 
-  async findByUser(
-    paginationDto: PaginationClothesDto,
-    userId: string,
-  ): Promise<Clothes[]> {
-    const page = paginationDto.page ?? 1;
-    const limit = paginationDto.limit ?? 10;
-
-    return this.clothesRepository.find({
-      where: { user: { id: userId } },
-      relations: ['user', 'schedules', 'collections'],
-      skip: (page - 1) * limit,
-      take: limit,
+  async findAllByIds(clothesIds: string[]): Promise<Clothes[]> {
+    return await this.clothesRepository.find({
+      where: {
+        id: In(clothesIds),
+      },
+      relations: ['user'],
     });
+  }
+
+  async findByUser(
+    userId: string,
+    paginationDto?: PaginationClothesDto,
+    status?: ClothesStatus,
+  ): Promise<Clothes[]> {
+    // --- 1. Build the WHERE clause (no changes here) ---
+    const where: FindOptionsWhere<Clothes> = {
+      user: { id: userId },
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    // --- 2. Build the main options for the find query ---
+    const findOptions: FindManyOptions<Clothes> = {
+      where,
+      relations: ['user', 'schedules', 'collections'],
+    };
+
+    // --- 3. Conditionally add pagination ---
+    if (paginationDto) {
+      const page = paginationDto.page ?? 1;
+      const limit = paginationDto.limit ?? 10;
+      findOptions.skip = (page - 1) * limit;
+      findOptions.take = limit;
+    }
+
+    return this.clothesRepository.find(findOptions);
   }
 
   async createClothes(

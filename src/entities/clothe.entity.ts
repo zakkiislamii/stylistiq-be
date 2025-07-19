@@ -13,6 +13,7 @@ import { User } from './user.entity';
 import { Schedule } from './schedule.entity';
 import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 import { Collection } from './collection.entity';
+import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
 
 @Entity('clothes')
 export class Clothes {
@@ -41,6 +42,14 @@ export class Clothes {
 
   @Column({ name: 'note', type: 'varchar', nullable: true })
   note?: string | null;
+
+  @Column({
+    name: 'status',
+    type: 'enum',
+    enum: ClothesStatus,
+    default: ClothesStatus.DIMILIKI,
+  })
+  status: ClothesStatus;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
