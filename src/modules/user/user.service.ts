@@ -11,10 +11,10 @@ export class UserService {
     return await this.userRepository.findByEmail(email);
   }
 
-  async findUserById(userId: string): Promise<User | null> {
+  async findUserById(userId: string): Promise<User> {
     const data = await this.userRepository.findUserById(userId);
     if (!data) {
-      return null;
+      throw new NotFoundException('User not found');
     }
     if (data.profilePhoto) {
       data.profilePhoto = `${BASE_URL}/file/${userId}/profile/${data.profilePhoto}`;

@@ -14,6 +14,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ClothesAnalysisResult } from './dto/analyzeClothes.dto';
 import { PaginationClothesDto } from './dto/paginationClothes,dto';
+import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class ClothesService {
@@ -29,13 +31,20 @@ export class ClothesService {
     return clothes;
   }
 
+  async findAllByIds(clothesIds: string[]): Promise<Clothes[]> {
+    const clothes = await this.clothesRepository.findAllByIds(clothesIds);
+    return clothes;
+  }
+
   async findByUser(
-    paginationDto: PaginationClothesDto,
     userId: string,
+    paginationDto?: PaginationClothesDto,
+    status?: ClothesStatus,
   ): Promise<Clothes[]> {
     const clothes = await this.clothesRepository.findByUser(
-      paginationDto,
       userId,
+      paginationDto,
+      status,
     );
     return clothes;
   }
@@ -117,11 +126,13 @@ export class ClothesService {
           category: ClothesCategory;
           itemType: string;
           color: string;
+          note: string;
         },...]
 
         DENGAN SYARAT:
         ClothesCategory=${clothesCategoryValues.join(', ')}
-        color HARUS berupa SATU warna primernya
+        Color HARUS berupa SATU warna primernya
+        Note berupa PENJELASAN SINGKAT dan TEMA YANG COCOK
         Pastikan output hanya berupa JSON yang valid.
       `;
 
@@ -152,6 +163,7 @@ export class ClothesService {
                     category: { type: 'STRING' },
                     itemType: { type: 'STRING' },
                     color: { type: 'STRING' },
+                    note: { type: 'STRING' },
                   },
                   required: ['category', 'itemType', 'color'],
                 },
@@ -237,10 +249,195 @@ export class ClothesService {
     }
   }
 
+  async matchClothes(
+    user: User,
+    ownedClothes: any,
+    clothesIds: string[],
+  ): Promise<string[]> {
+    try {
+      const clothesToAnalyze =
+        await this.clothesRepository.findAllByIds(clothesIds);
+
+      const imageParts = clothesToAnalyze
+        .map((cloth) => {
+          if (!cloth.image) {
+            console.warn(
+              `Skipping cloth ID ${cloth.id} due to missing image URL or user ID.`,
+            );
+            return null;
+          }
+          // Extract the filename from the URL (e.g., "dde769...jpg")
+          const filename = path.basename(cloth.image);
+
+          // Construct the full local file path
+          // path.join combines parts into a valid path for your OS
+          // process.cwd() gives the root directory of your project
+          const filePath = path.join(
+            process.cwd(),
+            'uploads',
+            'private',
+            'user',
+            cloth.user.id, // Use the user ID associated with the specific cloth item
+            'clothes',
+            filename,
+          );
+
+          // Check if the file actually exists before trying to read it
+          if (!fs.existsSync(filePath)) {
+            console.error(`File not found at path: ${filePath}`);
+            return null;
+          }
+
+          // Read the file buffer directly from the filesystem
+          const fileBuffer = fs.readFileSync(filePath);
+
+          // Convert to base64 and get MIME type
+          const base64Data = fileBuffer.toString('base64');
+          const mimeType = this.getMimeTypeFromUrl(cloth.image);
+
+          return {
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Data,
+            },
+          };
+        })
+        .filter((part) => part !== null);
+
+      const clothesCategoryValues = Object.values(ClothesCategory);
+      const clothesToAnalyzeValue = JSON.stringify(clothesToAnalyze, null, 2);
+      const bodyProfileValue = user.bodyProfile
+        ? JSON.stringify(user.bodyProfile, null, 2)
+        : 'No Data';
+      const ownedClothesValues = JSON.stringify(ownedClothes, null, 2);
+      const prompt = `
+        BERIKUT DATA BAJU YANG INGIN DICARI PASANGANNYA:
+        ${clothesToAnalyzeValue}
+
+        BERIKUT DATA BODY PROFILE USER:
+        ${bodyProfileValue}
+
+        BERIKUT DATA BAJU YANG DIMILIKI USER:
+        ${ownedClothesValues}
+
+        Tolong berikan saya SATU SET id pakaian-pakaian yang COCOK dan SESUAI UNTUK DIGUNAKAN BERSAMA dengan gambar dan deskripsi pakaian serta profil badan user yang telah diberikan:
+
+        {
+          clothesIds: ['id1', 'id2', 'id3', ...]
+        }
+        
+        DENGAN SYARAT:
+        ClothesCategory=${clothesCategoryValues.join(', ')}
+        Pastikan output hanya berupa JSON yang valid SESUAI KETENTUAN!
+        JIKA TIDAK ADA PAKAIAN YANG COCOK, BISA DIKOSONGKAN!
+        HASIL JANGAN ADA PAKAIAN YANG ADA DI LIST "DATA BAJU YANG INGIN DICARI PASANGANNYA"
+      `;
+
+      type ChatPart =
+        | { text: string }
+        | { inlineData: { mimeType: string; data: string } };
+      type ChatMessage = { role: string; parts: ChatPart[] };
+
+      const chatHistory: ChatMessage[] = [];
+      chatHistory.push({
+        role: 'user',
+        parts: [{ text: prompt }, ...imageParts],
+      });
+
+      // Payload untuk generate JSON
+      const payload = {
+        contents: chatHistory,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              clothes: {
+                type: 'ARRAY',
+                items: {
+                  type: 'STRING',
+                },
+              },
+            },
+            required: ['clothes'],
+          },
+        },
+      };
+
+      const apiKey = GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new InternalServerErrorException(
+          'Gemini API Key not configured.',
+        );
+      }
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Gemini API Error:', errorData);
+        throw new InternalServerErrorException(
+          'Failed to get analysis from AI. ' + JSON.stringify(errorData),
+        );
+      }
+
+      const result = await response.json();
+
+      if (
+        result.candidates &&
+        result.candidates.length > 0 &&
+        result.candidates[0].content &&
+        result.candidates[0].content.parts &&
+        result.candidates[0].content.parts.length > 0
+      ) {
+        const jsonString = result.candidates[0].content.parts[0].text;
+        const parsedJson = JSON.parse(jsonString);
+
+        if (parsedJson && Array.isArray(parsedJson.clothes)) {
+          return parsedJson.clothes as string[];
+        } else {
+          throw new InternalServerErrorException(
+            'AI response was not in the expected format.',
+          );
+        }
+      } else {
+        throw new InternalServerErrorException('No valid response from AI.');
+      }
+    } catch (error) {
+      console.error('Error in matchClothes service:', error);
+
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'An unexpected error occurred during clothes analysis.',
+      );
+    }
+  }
+
   async updateImageClothes(
     clothesId: string,
     image: string,
   ): Promise<{ imagePath: string; clothesId: string }> {
     return this.clothesRepository.updateImageClothes(clothesId, image);
+  }
+
+  private getMimeTypeFromUrl(url: string): string {
+    const extension = url.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      default:
+        // A safe default
+        return 'application/octet-stream';
+    }
   }
 }
