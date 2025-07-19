@@ -56,14 +56,6 @@ export class ClothesService {
     const clothesList: Clothes[] = [];
 
     for (const dto of dtos.clothes) {
-      // const schedules = dto.scheduleIds?.length
-      //   ? await this.scheduleRepository.findByIds(dto.scheduleIds)
-      //   : [];
-
-      // const collections = dto.collectionIds?.length
-      //   ? await this.collectionRepository.findByIds(dto.collectionIds)
-      //   : [];
-
       const clothes = await this.clothesRepository.createClothes(userId, dto);
 
       clothesList.push(clothes);
@@ -266,32 +258,24 @@ export class ClothesService {
             );
             return null;
           }
-          // Extract the filename from the URL (e.g., "dde769...jpg")
           const filename = path.basename(cloth.image);
-
-          // Construct the full local file path
-          // path.join combines parts into a valid path for your OS
-          // process.cwd() gives the root directory of your project
           const filePath = path.join(
             process.cwd(),
             'uploads',
             'private',
             'user',
-            cloth.user.id, // Use the user ID associated with the specific cloth item
+            cloth.user.id,
             'clothes',
             filename,
           );
 
-          // Check if the file actually exists before trying to read it
           if (!fs.existsSync(filePath)) {
             console.error(`File not found at path: ${filePath}`);
             return null;
           }
 
-          // Read the file buffer directly from the filesystem
           const fileBuffer = fs.readFileSync(filePath);
 
-          // Convert to base64 and get MIME type
           const base64Data = fileBuffer.toString('base64');
           const mimeType = this.getMimeTypeFromUrl(cloth.image);
 
@@ -344,7 +328,6 @@ export class ClothesService {
         parts: [{ text: prompt }, ...imageParts],
       });
 
-      // Payload untuk generate JSON
       const payload = {
         contents: chatHistory,
         generationConfig: {
@@ -436,7 +419,6 @@ export class ClothesService {
       case 'png':
         return 'image/png';
       default:
-        // A safe default
         return 'application/octet-stream';
     }
   }
