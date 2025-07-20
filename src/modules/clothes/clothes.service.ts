@@ -316,6 +316,9 @@ export class ClothesService {
         Pastikan output hanya berupa JSON yang valid SESUAI KETENTUAN!
         JIKA TIDAK ADA PAKAIAN YANG COCOK, BISA DIKOSONGKAN!
         HASIL JANGAN ADA PAKAIAN YANG ADA DI LIST "DATA BAJU YANG INGIN DICARI PASANGANNYA"
+        Pastikan bahwa pakaian yang direkomendasikan merupakan pelengkap yang logis dan cocok secara estetika maupun fungsi dengan pakaian yang telah diberikan pada DATA BAJU YANG INGIN DICARI PASANGANNYA.
+        CONTOH: Jika clothesToAnalyzeValue berisi topi dan gelang, maka rekomendasi harus mencakup pakaian inti seperti top (contoh: kaos polo), bottom (contoh: celana jeans), dan/atau sepatu. 
+        JANGAN rekomendasikan jenis pakaian yang sama atau mirip secara fungsi dengan yang sudah ada di clothesToAnalyzeValue. Hindari duplikasi seperti menyarankan celana jeans jika sudah ada celana jeans lain yang direkomendasikan.
       `;
 
       type ChatPart =
