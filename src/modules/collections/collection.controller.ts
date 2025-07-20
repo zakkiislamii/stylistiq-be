@@ -68,7 +68,6 @@ export class CollectionController {
   @Post()
   @DynamicFileInterceptor('image', (req: Request) => {
     const userId = req['user'].userId;
-    // We can create a dynamic path for collection images
     const paths = folder(userId).collection;
     return paths;
   })
@@ -77,11 +76,7 @@ export class CollectionController {
     @Body() dto: CreateCollectionDto,
     @UploadedFile(
       new ParseFilePipe({
-        fileIsRequired: false, // Make the image optional
-        // validators: [
-        //   new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // Max 5MB
-        //   new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-        // ],
+        fileIsRequired: false,
       }),
     )
     imageFile: Express.Multer.File,
@@ -113,11 +108,7 @@ export class CollectionController {
     @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
-        fileIsRequired: false, // Make the image optional
-        // validators: [
-        //   new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // Max 5MB
-        //   new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-        // ],
+        fileIsRequired: false,
       }),
     )
     imageFile: Express.Multer.File,
