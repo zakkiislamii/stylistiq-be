@@ -123,8 +123,9 @@ export class ClothesService {
 
         DENGAN SYARAT:
         ClothesCategory=${clothesCategoryValues.join(', ')}
-        Color HARUS berupa SATU warna primernya
-        Note berupa PENJELASAN SINGKAT dan TEMA YANG COCOK
+        Color HARUS berupa SATU warna primernya!
+        Note berupa PENJELASAN SINGKAT dan TEMA YANG COCOK!
+        SATU GAMBAR hanya SATU DESKRIPSI saja, JIKA ADA LEBIH DARI SATU PAKAIAN DALAM SATU GAMBAR, PILIH YANG PALING DOMINAN!
         Pastikan output hanya berupa JSON yang valid.
       `;
 
