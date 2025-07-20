@@ -37,7 +37,6 @@ export class ClothesRepository {
     paginationDto?: PaginationClothesDto,
     status?: ClothesStatus,
   ): Promise<Clothes[]> {
-    // --- 1. Build the WHERE clause (no changes here) ---
     const where: FindOptionsWhere<Clothes> = {
       user: { id: userId },
     };
@@ -46,13 +45,11 @@ export class ClothesRepository {
       where.status = status;
     }
 
-    // --- 2. Build the main options for the find query ---
     const findOptions: FindManyOptions<Clothes> = {
       where,
       relations: ['user', 'schedules', 'collections'],
     };
 
-    // --- 3. Conditionally add pagination ---
     if (paginationDto) {
       const page = paginationDto.page ?? 1;
       const limit = paginationDto.limit ?? 10;
@@ -74,8 +71,6 @@ export class ClothesRepository {
     clothes.color = dto.color ?? null;
     clothes.image = dto.image ?? null;
     clothes.note = dto.note ?? null;
-    // clothes.schedules = schedules;
-    // clothes.collections = collections;
 
     const saved = await this.clothesRepository.save(clothes);
     return this.clothesRepository.findOneOrFail({
