@@ -127,6 +127,8 @@ export class ClothesService {
         Note berupa PENJELASAN SINGKAT dan TEMA YANG COCOK!
         SATU GAMBAR hanya SATU DESKRIPSI saja, JIKA ADA LEBIH DARI SATU PAKAIAN DALAM SATU GAMBAR, PILIH YANG PALING DOMINAN!
         Pastikan output hanya berupa JSON yang valid.
+
+        JAWAB DALAM BAHASA INDONESIA!
       `;
 
       type ChatPart =
@@ -319,7 +321,9 @@ export class ClothesService {
         Pastikan bahwa pakaian yang direkomendasikan merupakan pelengkap yang logis dan cocok secara estetika maupun fungsi dengan pakaian yang telah diberikan pada DATA BAJU YANG INGIN DICARI PASANGANNYA.
         CONTOH: Jika clothesToAnalyzeValue berisi topi dan gelang, maka rekomendasi harus mencakup pakaian inti seperti top (contoh: kaos polo), bottom (contoh: celana jeans), dan/atau sepatu. 
         JANGAN rekomendasikan jenis pakaian yang sama atau mirip secara fungsi dengan yang sudah ada di clothesToAnalyzeValue. Hindari duplikasi seperti menyarankan celana jeans jika sudah ada celana jeans lain yang direkomendasikan.
-      `;
+      
+        JAWAB DALAM BAHASA INDONESIA!
+        `;
 
       type ChatPart =
         | { text: string }
