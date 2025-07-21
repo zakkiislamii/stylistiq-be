@@ -146,6 +146,7 @@ export class ClothesController {
     );
 
     const document = {
+      id: data.id,
       category: data.category,
       itemType: data.itemType ?? null,
       color: data.color ?? null,
@@ -223,6 +224,7 @@ export class ClothesController {
 
     for (const clothes of createdClothes) {
       const document = {
+        id: clothes.id,
         category: clothes.category,
         itemType: clothes.itemType ?? null,
         color: clothes.color ?? null,
