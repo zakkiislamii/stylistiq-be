@@ -19,13 +19,11 @@ export class CreateClothesInput {
   @IsEnum(ClothesCategory)
   category: ClothesCategory;
 
-  @IsOptional()
   @IsString()
-  itemType?: string;
+  itemType: string;
 
-  @IsOptional()
   @IsString()
-  color?: string;
+  color: string;
 
   @IsOptional()
   @IsString()

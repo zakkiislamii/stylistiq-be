@@ -3,6 +3,14 @@ import { Client, estypes } from '@elastic/elasticsearch';
 import { ElasticClothesDocument } from '../clothes/dto/elasticClothesDocument.dto';
 import { PaginationClothesDto } from '../clothes/dto/paginationClothes,dto';
 import { SearchClothesDto } from '../clothes/dto/searchClothes.dto';
+import { getRandomValues, randomUUID } from 'crypto';
+
+type BulkError = {
+  status: number;
+  error: estypes.ErrorCause;
+  operation: any;
+  document: any;
+};
 
 @Injectable()
 export class SearchService {
@@ -109,5 +117,61 @@ export class SearchService {
       index,
       query,
     });
+  }
+
+  async deleteUserClothes(index: string, userId: string) {
+    this.logger.log(
+      `Deleting all clothes from index [${index}] for user [${userId}]`,
+    );
+    return this.esClient.deleteByQuery({
+      index,
+      query: {
+        term: {
+          'userId.keyword': {
+            value: userId,
+          },
+        },
+      },
+      refresh: true,
+    });
+  }
+
+  async bulkIndexClothes(index: string, documents: ElasticClothesDocument[]) {
+    if (documents.length === 0) {
+      this.logger.log('No documents to bulk index.');
+      return;
+    }
+
+    this.logger.log(
+      `Bulk indexing ${documents.length} documents into index [${index}]`,
+    );
+
+    const operations = documents.flatMap((doc) => [
+      { index: { _index: index, _id: doc.id ?? randomUUID() } },
+      doc,
+    ]);
+
+    const bulkResponse = await this.esClient.bulk({
+      refresh: true,
+      operations,
+    });
+
+    if (bulkResponse.errors) {
+      const erroredDocuments: BulkError[] = [];
+      bulkResponse.items.forEach((action, i) => {
+        const operation = Object.keys(action)[0];
+        if (action[operation].error) {
+          erroredDocuments.push({
+            status: action[operation].status,
+            error: action[operation].error,
+            operation: operations[i * 2],
+            document: operations[i * 2 + 1],
+          });
+        }
+      });
+      this.logger.error('Some documents failed to index', erroredDocuments);
+    }
+
+    return bulkResponse;
   }
 }

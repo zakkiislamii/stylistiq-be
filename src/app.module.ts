@@ -17,9 +17,12 @@ import { CollectionModule } from './modules/collections/collection.module';
 import { ScheduleModule } from './modules/schedules/schedule.module';
 import { ScheduleController } from './modules/schedules/schedule.controller';
 import { ElasticSearchModule } from './modules/elasticSearch/elasticSearch.module';
+import { ScheduleModule as SchedulerModule } from '@nestjs/schedule';
+import { SyncService } from './modules/elasticSearch/sync.service';
 
 @Module({
   imports: [
+    SchedulerModule.forRoot(),
     DatabaseModule,
     UserModule,
     AuthModule,
@@ -40,6 +43,6 @@ import { ElasticSearchModule } from './modules/elasticSearch/elasticSearch.modul
     CollectionController,
     ScheduleController,
   ],
-  providers: [JwtAuth],
+  providers: [JwtAuth, SyncService],
 })
 export class AppModule {}
