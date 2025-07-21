@@ -32,10 +32,10 @@ export class Clothes {
   category: ClothesCategory;
 
   @Column({ name: 'item_type', type: 'varchar', nullable: true })
-  itemType?: string | null;
+  itemType: string | null;
 
   @Column({ name: 'color', type: 'varchar', nullable: true })
-  color?: string | null;
+  color: string | null;
 
   @Column({ name: 'image', type: 'varchar', nullable: true })
   image?: string | null;
