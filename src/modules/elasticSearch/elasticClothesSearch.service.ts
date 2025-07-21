@@ -38,34 +38,36 @@ export class SearchService {
     userId: string,
     searchDto: SearchClothesDto,
   ) {
-    const terms = searchDto.q ?? '';
+    const terms = searchDto.q?.trim() ?? '';
     const page = searchDto?.page ?? 1;
     const limit = searchDto?.limit ?? 10;
     const from = (page - 1) * limit;
 
+    const mustClauses: estypes.QueryDslQueryContainer[] = [
+      {
+        term: {
+          'userId.keyword': {
+            value: userId,
+          },
+        },
+      },
+    ];
+
+    if (terms) {
+      mustClauses.push({
+        multi_match: {
+          query: terms,
+          fields: ['category', 'itemType', 'color', 'note'],
+          type: 'best_fields',
+          fuzziness: 'AUTO',
+          operator: 'or',
+        },
+      });
+    }
+
     const query: estypes.QueryDslQueryContainer = {
       bool: {
-        must: [
-          {
-            term: {
-              'userId.keyword': {
-                value: userId,
-              },
-            },
-          },
-        ],
-        should: [
-          {
-            multi_match: {
-              query: terms,
-              fields: ['category', 'itemType', 'color', 'note'],
-              type: 'best_fields',
-              fuzziness: 'AUTO',
-              operator: 'or',
-            },
-          },
-        ],
-        minimum_should_match: 1,
+        must: mustClauses,
       },
     };
 
