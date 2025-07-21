@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, ILike, In, Repository } from 'typeorm';
 import * as path from 'path';
 import { Collection } from 'src/entities/collection.entity';
 import { CreateCollectionDto } from './dto/createCollection.dto';
@@ -29,13 +29,25 @@ export class CollectionRepository {
   ): Promise<Collection[]> {
     const page = paginationDto.page ?? 1;
     const limit = paginationDto.limit ?? 10;
+    const q = paginationDto.q ?? null;
 
-    return this.collectionRepository.find({
-      where: { user: { id: userId } },
+    const findOptions: FindManyOptions<Collection> = {
+      where: {
+        user: { id: userId },
+      },
       relations: ['user', 'clothes'],
       skip: (page - 1) * limit,
       take: limit,
-    });
+    };
+
+    if (q) {
+      findOptions.where = {
+        ...findOptions.where,
+        name: ILike(`%${q}%`),
+      };
+    }
+
+    return this.collectionRepository.find(findOptions);
   }
 
   async createCollection(
