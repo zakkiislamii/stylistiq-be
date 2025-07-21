@@ -33,6 +33,7 @@ import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 import { UserService } from '../user/user.service';
 import { MatchClothesDto } from './dto/matchClothes.dto';
 import { SearchService } from '../elasticSearch/elasticClothesSearch.service';
+import { SearchClothesDto } from './dto/searchClothes.dto';
 
 @Controller('clothes')
 export class ClothesController {
@@ -72,15 +73,18 @@ export class ClothesController {
 
   @UseGuards(JwtAuth)
   @Get('search/all')
-  async searchAllClothesByUser(@Req() req: Request, @Query('q') query: string) {
-    if (!query) {
-      throw new BadRequestException('Search query parameter "q" is required.');
-    }
+  async searchAllClothesByUser(
+    @Req() req: Request,
+    @Query() searchDto: SearchClothesDto,
+  ) {
+    // if (!query) {
+    //   throw new BadRequestException('Search query parameter "q" is required.');
+    // }
     const userId = req['user'].userId;
     const searchResults = await this.searchService.searchMultiTerm(
       'clothes-index',
-      query,
       userId,
+      searchDto,
     );
 
     const data = searchResults.hits.hits.map((hit) => hit._source);
