@@ -28,11 +28,11 @@ import { PaginationClothesDto } from './dto/paginationClothes,dto';
 import { DynamicFileInterceptor } from 'src/common/interceptors/dynamicFile.interceptor';
 import { BASE_URL } from 'src/configs/env.config';
 import { FileUploadService } from '../fileUpload/fileUpload.service';
-// import { SearchService } from '../elasticSearch/elasticClothesSearch.service';
 import { ClothesStatus } from 'src/contracts/enums/clothesStatus.enum';
 import { ClothesCategory } from 'src/contracts/enums/clothesCategory.enum';
 import { UserService } from '../user/user.service';
 import { MatchClothesDto } from './dto/matchClothes.dto';
+import { SearchService } from '../elasticSearch/elasticClothesSearch.service';
 
 @Controller('clothes')
 export class ClothesController {
@@ -40,7 +40,7 @@ export class ClothesController {
     private readonly clothesService: ClothesService,
     private readonly userService: UserService,
     private readonly fileUploadService: FileUploadService,
-    // private readonly searchService: SearchService,
+    private readonly searchService: SearchService,
   ) {}
   @UseGuards(JwtAuth)
   @Get(':id')
@@ -66,6 +66,28 @@ export class ClothesController {
     return ResponseHelper.success(
       data,
       "Successfully retrieved user's clothes",
+      HttpStatus.OK,
+    );
+  }
+
+  @UseGuards(JwtAuth)
+  @Get('search/all')
+  async searchAllClothesByUser(@Req() req: Request, @Query('q') query: string) {
+    if (!query) {
+      throw new BadRequestException('Search query parameter "q" is required.');
+    }
+    const userId = req['user'].userId;
+    const searchResults = await this.searchService.searchMultiTerm(
+      'clothes-index',
+      query,
+      userId,
+    );
+
+    const data = searchResults.hits.hits.map((hit) => hit._source);
+
+    return ResponseHelper.success(
+      data,
+      'Successfully retrieved clothes based on search query',
       HttpStatus.OK,
     );
   }
@@ -119,21 +141,21 @@ export class ClothesController {
       dto,
     );
 
-    // const document = {
-    //   category: data.category,
-    //   itemType: data.itemType ?? null,
-    //   color: data.color ?? null,
-    //   note: data.note ?? null,
-    //   status: data.status,
-    //   images: data.image ?? null,
-    //   userId: userId,
-    // };
+    const document = {
+      category: data.category,
+      itemType: data.itemType ?? null,
+      color: data.color ?? null,
+      note: data.note ?? null,
+      status: data.status,
+      images: data.image ?? null,
+      userId: userId,
+    };
 
-    // await this.searchService.updateClothes(
-    //   'clothes-index',
-    //   clothesId,
-    //   document,
-    // );
+    await this.searchService.updateClothes(
+      'clothes-index',
+      clothesId,
+      document,
+    );
 
     return ResponseHelper.success(
       data,
@@ -148,9 +170,9 @@ export class ClothesController {
     const userId = req['user'].userId;
     const data = await this.clothesService.deleteClothes(userId, dto);
 
-    // for (const id of dto.clothesIds) {
-    //   await this.searchService.deleteClothes('clothes-index', id);
-    // }
+    for (const id of dto.clothesIds) {
+      await this.searchService.deleteClothes('clothes-index', id);
+    }
 
     return ResponseHelper.success(
       data,
@@ -195,24 +217,24 @@ export class ClothesController {
       clothes: results,
     } as CreateClothesDto);
 
-    // for (const clothes of createdClothes) {
-    //   const document = {
-    //     category: clothes.category,
-    //     itemType: clothes.itemType ?? null,
-    //     color: clothes.color ?? null,
-    //     note: clothes.note ?? null,
-    //     status: clothes.status,
-    //     images: clothes.image ?? null,
-    //     userId: userId,
-    //   };
+    for (const clothes of createdClothes) {
+      const document = {
+        category: clothes.category,
+        itemType: clothes.itemType ?? null,
+        color: clothes.color ?? null,
+        note: clothes.note ?? null,
+        status: clothes.status,
+        images: clothes.image ?? null,
+        userId: userId,
+      };
 
-    //   // Assuming `cloth.id` is the unique ID from your database
-    //   await this.searchService.indexClothes(
-    //     'clothes-index',
-    //     clothes.id,
-    //     document,
-    //   );
-    // }
+      // Assuming `cloth.id` is the unique ID from your database
+      await this.searchService.indexClothes(
+        'clothes-index',
+        clothes.id,
+        document,
+      );
+    }
 
     return {
       message: 'Images uploaded and processed successfully!',
