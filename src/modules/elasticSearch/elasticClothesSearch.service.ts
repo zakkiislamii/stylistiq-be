@@ -1,6 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Client, estypes } from '@elastic/elasticsearch';
 import { ElasticClothesDocument } from '../clothes/dto/elasticClothesDocument.dto';
+import { PaginationClothesDto } from '../clothes/dto/paginationClothes,dto';
+import { SearchClothesDto } from '../clothes/dto/searchClothes.dto';
 
 @Injectable()
 export class SearchService {
@@ -31,7 +33,16 @@ export class SearchService {
     return this.esClient.search(searchRequest);
   }
 
-  async searchMultiTerm(index: string, terms: string, userId: string) {
+  async searchMultiTerm(
+    index: string,
+    userId: string,
+    searchDto: SearchClothesDto,
+  ) {
+    const terms = searchDto.q ?? '';
+    const page = searchDto?.page ?? 1;
+    const limit = searchDto?.limit ?? 10;
+    const from = (page - 1) * limit;
+
     const query: estypes.QueryDslQueryContainer = {
       bool: {
         must: [
@@ -61,6 +72,8 @@ export class SearchService {
     const searchRequest: estypes.SearchRequest = {
       index,
       query,
+      from,
+      size: limit,
     };
 
     return this.esClient.search(searchRequest);
