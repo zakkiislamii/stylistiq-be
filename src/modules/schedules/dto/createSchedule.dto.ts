@@ -22,6 +22,5 @@ export class CreateScheduleDto {
 
   @IsArray()
   @IsUUID('4', { each: true })
-  @IsOptional()
-  clothesIds?: string[];
+  clothesIds: string[];
 }
