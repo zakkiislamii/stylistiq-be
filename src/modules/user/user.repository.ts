@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from 'src/modules/user/dto/updateUser.dto';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -44,16 +39,6 @@ export class UserRepository {
     const existingUser = await this.userRepository.findOne({
       where: { id: userId },
     });
-
-    if (dto.email) {
-      const existingEmailUser = await this.userRepository.findOne({
-        where: { email: dto.email },
-      });
-
-      if (existingEmailUser && existingEmailUser.id !== userId) {
-        throw new BadRequestException('Email already in use');
-      }
-    }
 
     const updatedUser = {
       ...existingUser,
