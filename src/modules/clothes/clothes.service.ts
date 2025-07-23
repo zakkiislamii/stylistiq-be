@@ -111,6 +111,8 @@ export class ClothesService {
       });
 
       const clothesCategoryValues = Object.values(ClothesCategory);
+      const imageCount = tempFilePaths.length;
+
       const prompt = `
         Tolong berikan saya deskripsi seluruh pakaian dalam bentuk JSON dari gambar yang berisi:
 
@@ -125,7 +127,10 @@ export class ClothesService {
         ClothesCategory=${clothesCategoryValues.join(', ')}
         Color HARUS berupa SATU warna primernya!
         Note berupa PENJELASAN SINGKAT dan TEMA YANG COCOK!
-        SATU GAMBAR hanya SATU DESKRIPSI saja, JIKA ADA LEBIH DARI SATU PAKAIAN DALAM SATU GAMBAR, PILIH YANG PALING DOMINAN!
+        SETIAP GAMBAR hanya SATU DESKRIPSI saja! (TERDAPAT ${imageCount} GAMBAR)
+        JIKA ADA LEBIH DARI SATU PAKAIAN DALAM SATU GAMBAR, PILIH YANG PALING DOMINAN!
+        CONTOH: JIKA ADA DUA GAMBAR, MENGHASILKAN DUA DESKRIPSI. JIKA ADA SATU GAMBAR BERISI BAJU DAN CELANA, MENGHASILKAN DESKRIPSI PAKAIAN YANG PALING DOMINAN ANTARA BAJU ATAU CELANA TERSEBUT!
+
         Pastikan output hanya berupa JSON yang valid.
 
         JAWAB DALAM BAHASA INDONESIA!
@@ -152,6 +157,8 @@ export class ClothesService {
             properties: {
               clothes: {
                 type: 'ARRAY',
+                minItems: imageCount,
+                maxItems: imageCount,
                 items: {
                   type: 'OBJECT',
                   properties: {
