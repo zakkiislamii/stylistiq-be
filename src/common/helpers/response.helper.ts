@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiErrorResponse,
@@ -13,6 +14,8 @@ import { Response } from 'express';
 import { MulterError } from 'multer';
 
 export class ResponseHelper {
+  private static readonly logger = new Logger(ResponseHelper.name);
+
   static success<T>(
     data: T,
     message: string = 'Success',
@@ -30,6 +33,10 @@ export class ResponseHelper {
     error: string | string[],
     statusCode: number = HttpStatus.INTERNAL_SERVER_ERROR,
   ): ApiErrorResponse {
+    if (statusCode >= 500) {
+      this.logger.error(message);
+    }
+
     return {
       statusCode,
       message,
