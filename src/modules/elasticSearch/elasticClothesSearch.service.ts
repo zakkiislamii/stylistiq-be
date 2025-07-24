@@ -48,7 +48,7 @@ export class SearchService {
   ) {
     const terms = searchDto.q?.trim() ?? '';
     const page = searchDto?.page ?? 1;
-    const limit = searchDto?.limit ?? 10;
+    const limit = searchDto?.limit ?? 1000;
     const from = (page - 1) * limit;
 
     const mustClauses: estypes.QueryDslQueryContainer[] = [

@@ -130,6 +130,8 @@ export class ClothesService {
         SETIAP GAMBAR hanya SATU DESKRIPSI saja! (TERDAPAT ${imageCount} GAMBAR)
         JIKA ADA LEBIH DARI SATU PAKAIAN DALAM SATU GAMBAR, PILIH YANG PALING DOMINAN!
         CONTOH: JIKA ADA DUA GAMBAR, MENGHASILKAN DUA DESKRIPSI. JIKA ADA SATU GAMBAR BERISI BAJU DAN CELANA, MENGHASILKAN DESKRIPSI PAKAIAN YANG PALING DOMINAN ANTARA BAJU ATAU CELANA TERSEBUT!
+        JIKA TIDAK ADA PAKAIAN DALAM GAMBAR TIDAK USAH DIKEMBALIKAN! KOSONGKAN SAJA RETURN CLOTHES MENJADI ARRAY KOSONG!
+        JIKA ADA GAMBAR YANG MELARANG ETIKA ATAU BERBAU SARA, KOSONGKAN SAJA RETURN CLOTHES MENJADI ARRAY KOSONG!
 
         Pastikan output hanya berupa JSON yang valid.
 
@@ -157,7 +159,7 @@ export class ClothesService {
             properties: {
               clothes: {
                 type: 'ARRAY',
-                minItems: imageCount,
+                minItems: 0,
                 maxItems: imageCount,
                 items: {
                   type: 'OBJECT',
