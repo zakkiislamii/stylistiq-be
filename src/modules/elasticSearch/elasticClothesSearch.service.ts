@@ -63,12 +63,26 @@ export class SearchService {
 
     if (terms) {
       mustClauses.push({
-        multi_match: {
-          query: terms,
-          fields: ['category', 'itemType', 'color', 'note'],
-          type: 'best_fields',
-          fuzziness: 'AUTO',
-          operator: 'or',
+        bool: {
+          should: [
+            {
+              prefix: {
+                'itemType.keyword': {
+                  value: terms,
+                },
+              },
+            },
+            {
+              multi_match: {
+                query: terms,
+                fields: ['category', 'color', 'note'],
+                type: 'best_fields',
+                fuzziness: 'AUTO',
+                operator: 'or',
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       });
     }
